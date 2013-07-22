@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="postgresif" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <non-jta-data-source>java:comp/env/jdbc/apis</non-jta-data-source>
+    <class>nl.hsleiden.webapi.model.Employee</class>
+    <class>nl.hsleiden.webapi.model.Student</class>
+    <class>nl.hsleiden.webapi.model.Employees</class>
+    <class>nl.hsleiden.webapi.model.Students</class>
+    <class>nl.hsleiden.webapi.model.Images</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <!--<properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/informationframeworkold?useEncoding=true&amp;characterEncoding=UTF-8"/>
+      <property name="javax.persistence.jdbc.password" value="postgres"/>
+      <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+      <property name="javax.persistence.jdbc.user" value="postgres"/>
+    </properties>-->
+  </persistence-unit>
+  <!--<persistence-unit name="acc" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <class>nl.hsleiden.webapi.model.Employee</class>
+    <class>nl.hsleiden.webapi.model.Student</class>
+    <class>nl.hsleiden.webapi.model.Employees</class>
+    <class>nl.hsleiden.webapi.model.Students</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://IFWDB01.hsleiden.intra\IFWDB01:1433;databaseName=IFWDB01ACCP" />
+      <property name="javax.persistence.jdbc.password" value="accplees"/>
+      <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <property name="javax.persistence.jdbc.user" value="leesaccp"/>
+    </properties>
+  </persistence-unit>-->
+  <persistence-unit name="testdatabase" transaction-type="RESOURCE_LOCAL">
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://IFWDB01.hsleiden.intra\IFWDB01:1433;databaseName=IFWDB01TEST"/>
+      <property name="javax.persistence.jdbc.password" value="testlees"/>
+      <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <property name="javax.persistence.jdbc.user" value="leestest"/>
+    </properties>
+  </persistence-unit>
+</persistence>
