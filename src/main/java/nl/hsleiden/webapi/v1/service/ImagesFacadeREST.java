@@ -4,8 +4,10 @@
  */
 package nl.hsleiden.webapi.v1.service;
 
+import com.sun.jersey.api.NotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -34,18 +36,20 @@ public class ImagesFacadeREST extends AbstractFacade<Images> {
     }
 
     @GET
-    @Path("{id}")
+    @Path("/id/{id}")
     @Produces({"application/xml", "application/json"})
     public Images find(@PathParam("id") String id) {
-        logger.debug("In de methode find images" + id);
+
         EntityManager em = getEntityManager();
-        Query query = em.createNamedQuery("Images.findByStudentnumber").setParameter("studentnumber", id);
-        Images image = (Images)query.getSingleResult();
-        logger.debug("resultaat: " + image.getStudentnumber());
-        logger.debug("resultaat: " + image.getImage());
-        
+        Images image = null;
+        try {
+            Query query = em.createNamedQuery("Images.findByStudentnumber").setParameter("studentnumber", id);
+            image = (Images) query.getSingleResult();
+        } catch (NoResultException ne) {
+            logger.info("Er is geen resultaat voor studentnummer: " + id);
+            throw new NotFoundException("No person found for searchparam " + id);
+        }
         return image;
-        //return super.find(id);
     }
 
     
