@@ -25,8 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Images.findAll", query = "SELECT i FROM Images i"),
-    @NamedQuery(name = "Images.findByStudentnumber", query = "SELECT i FROM Images i WHERE i.studentnumber = :studentnumber"),
-    @NamedQuery(name = "Images.findByImage", query = "SELECT i FROM Images i WHERE i.image = :image")})
+    @NamedQuery(name = "Images.findByStudentnumber", query = "SELECT i FROM Images i WHERE i.studentnumber = :studentnumber")})
 public class Images implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -36,7 +35,7 @@ public class Images implements Serializable {
     @Column(name = "studentnumber")
     private String studentnumber;
     @Column(name = "image")
-    private Serializable image;
+    private byte[] image;
 
     public Images() {
     }
@@ -53,11 +52,11 @@ public class Images implements Serializable {
         this.studentnumber = studentnumber;
     }
 
-    public Serializable getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(Serializable image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 
