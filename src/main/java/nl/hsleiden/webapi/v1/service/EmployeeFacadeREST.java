@@ -97,6 +97,7 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         logger.debug("In methode ");
         try {
             Validator.checkLengthLastname(lastname);
+            Validator.validateStringParameter(lastname);
         } catch (ValidationException ve) {
             ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
             builder.entity(ve.getMessage());
@@ -105,16 +106,6 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
             throw new WebApplicationException(res);
         }      
        
-        try {
-            Validator.validateStringParameter(lastname);
-        } catch (ValidationException ve) {
-            ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
-            builder.entity(ve.getMessage() );
-            builder.type(MediaType.TEXT_PLAIN);
-            Response res = builder.build();
-            throw new WebApplicationException(res);
-        }
-        
         EntityManager em = getEntityManager();
         String name = formatLastname(lastname);
         
