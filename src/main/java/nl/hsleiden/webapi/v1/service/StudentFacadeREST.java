@@ -101,15 +101,6 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         EntityManager em = getEntityManager();
         try {
             Validator.checkLengthLastname(lastname);
-        } catch (ValidationException ve) {
-            Response.ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
-            builder.entity(ve.getMessage());
-            builder.type(MediaType.TEXT_PLAIN);
-            Response res = builder.build();
-            throw new WebApplicationException(res);
-        }
-
-        try {
             Validator.validateStringParameter(lastname);
         } catch (ValidationException ve) {
             Response.ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
