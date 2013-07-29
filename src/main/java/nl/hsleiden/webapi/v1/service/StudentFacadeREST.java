@@ -18,6 +18,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import nl.hsleiden.webapi.model.Student;
 import nl.hsleiden.webapi.model.Students;
+import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
 import org.apache.log4j.Logger;
@@ -94,7 +96,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
     @GET
     @Path("{lastname}")
     @Produces({"application/json", "application/xml"})
-    public List<Students> findByLastname(@PathParam("lastname") String lastname) {
+    public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
 
         EntityManager em = getEntityManager();
         try {
@@ -119,15 +121,46 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
 
         String name = formatLastname(lastname);
         Query query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
-
+        Result result = new Result();
+        int maxResults;
+        int intOffset;
+        if (max != null && offset != null) {
+            logger.debug("Param max: " + max);
+            logger.debug("Param offset: " + offset);
+                        
+            maxResults = Integer.parseInt(max);
+            intOffset = Integer.parseInt(offset);
+                    
+            Query count = em.createNamedQuery("Students.getCount").setParameter("lastname", name);
+            int total = ((Long)count.getSingleResult()).intValue();
+            logger.debug("MaxResults: " + total);
+            
+            query.setMaxResults(maxResults);
+            query.setFirstResult(intOffset);
+            int nextOffset = intOffset + maxResults;
+            int previousOffset = intOffset - maxResults;
+            logger.debug("Previous offset: " + previousOffset);
+            if (nextOffset <= total) {
+                String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                result.setNext(next);
+            }
+            if (previousOffset > -1) {
+                String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                result.setPrevious(previous);
+            }
+         } else {
+            query.setFirstResult(0);
+        }
+        
+        
         List<Students> students = query.getResultList();
         if (students.isEmpty()) {
             logger.info("Er is geen resultaat voor param: " + lastname);
             throw new NotFoundException("No person found for searchparam " + lastname);
         }
         students = buildLink(students);
-        response.setHeader("NumberOfResults", String.valueOf(students.size()));
-        return students;
+        result.setStudents(students);
+        return result;
     }
 
     @Override
@@ -164,5 +197,13 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             s.setUri(userUri.toString());
         }
         return students;
+    }
+    
+    private String createpagingLink(String param, String max, String offset) {
+        String hostname = request.getServerName();
+        UriBuilder ub = uriInfo.getBaseUriBuilder();
+        URI userUri = ub.host(hostname).port(8080).path(StudentFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
+        
+        return userUri.toString();
     }
 }
