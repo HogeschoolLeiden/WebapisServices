@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name = "viewstudent")
-@XmlRootElement
+@XmlRootElement(name="students")
 @NamedQueries({
     @NamedQuery(name = "Students.findByLastname", query = "SELECT l FROM Students l WHERE lower(l.lastname) LIKE :lastname ORDER by l.lastname"),
     @NamedQuery(name = "Students.getCount", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname")})
