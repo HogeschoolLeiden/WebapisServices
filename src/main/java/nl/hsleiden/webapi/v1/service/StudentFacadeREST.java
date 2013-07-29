@@ -150,7 +150,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             throw new NotFoundException("No person found for searchparam " + lastname);
         }
         students = buildLink(students);
-        result.setStudents(students);
+        result.setResults(students);
         return result;
     }
 
