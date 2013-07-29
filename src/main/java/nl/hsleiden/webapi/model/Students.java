@@ -96,7 +96,7 @@ public class Students implements Serializable {
 
     @Override
     public String toString() {
-        return "nl.hsleiden.webapi.model.ListStudent[ id=" + id + " ]";
+        return "nl.hsleiden.webapi.model.Students[ id=" + id + " ]";
     }
     
 }
