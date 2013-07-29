@@ -55,7 +55,7 @@ public class ImagesFacadeREST extends AbstractFacade<Images> {
     
     @Override
     protected EntityManager getEntityManager() {
-        emf = Persistence.createEntityManagerFactory("postgresif");
+        emf = Persistence.createEntityManagerFactory("apis.hsleiden.nl");
         return emf.createEntityManager();
     }
     

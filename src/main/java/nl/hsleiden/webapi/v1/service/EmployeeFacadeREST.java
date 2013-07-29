@@ -131,7 +131,7 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
 
     @Override
     protected EntityManager getEntityManager() {
-        emf = Persistence.createEntityManagerFactory("postgresif");
+        emf = Persistence.createEntityManagerFactory("apis.hsleiden.nl");
         return emf.createEntityManager();
     }
     
