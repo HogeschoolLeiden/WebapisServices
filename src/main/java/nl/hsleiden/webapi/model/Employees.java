@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @Entity
 @Table(name = "viewmedewerker")
-@XmlRootElement
+@XmlRootElement(name="employees")
 @NamedQueries({
     @NamedQuery(name = "Employees.findByLastname", query = "SELECT l FROM Employees l WHERE lower(l.lastname) LIKE :lastname")})
 public class Employees implements Serializable {
