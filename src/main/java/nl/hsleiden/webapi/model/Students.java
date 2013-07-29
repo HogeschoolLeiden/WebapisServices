@@ -23,7 +23,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewstudent")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Students.findByLastname", query = "SELECT l FROM Students l WHERE lower(l.lastname) LIKE :lastname")})
+    @NamedQuery(name = "Students.findByLastname", query = "SELECT l FROM Students l WHERE lower(l.lastname) LIKE :lastname ORDER by l.lastname"),
+    @NamedQuery(name = "Students.getCount", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname")})
 public class Students implements Serializable {
     private static final long serialVersionUID = 1L;
     
