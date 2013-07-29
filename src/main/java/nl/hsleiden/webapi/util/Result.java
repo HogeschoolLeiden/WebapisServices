@@ -5,26 +5,33 @@
 package nl.hsleiden.webapi.util;
 
 import java.util.List;
+import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import nl.hsleiden.webapi.model.Employees;
 import nl.hsleiden.webapi.model.Students;
 
 /**
  *
  * @author hl
  */
-@XmlRootElement
-public class Result {
+@XmlRootElement(name="results")
+@XmlSeeAlso({Students.class, Employees.class})
+public class Result<T> {
     
-    private List<Students> students;
+    private List<T> results;
     private String previous;
     private String next;
 
-    public List<Students> getStudents() {
-        return students;
+
+    @XmlMixed
+    public List<T> getResults() {
+        return results;
     }
 
-    public void setStudents(List<Students> students) {
-        this.students = students;
+    public void setResults(List<T> results) {
+        
+        this.results = results;
     }
 
     public String getPrevious() {
