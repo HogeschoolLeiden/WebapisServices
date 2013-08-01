@@ -25,6 +25,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import nl.hsleiden.webapi.exception.BadRequestError;
+import nl.hsleiden.webapi.exception.InternalServerError;
+import nl.hsleiden.webapi.exception.NotFoundError;
+import nl.hsleiden.webapi.exception.UnauthorizedError;
 import nl.hsleiden.webapi.model.Student;
 import nl.hsleiden.webapi.model.Students;
 import nl.hsleiden.webapi.util.Result;
@@ -72,14 +76,10 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
                     return student;
                 } catch (NoResultException ne) {
                     logger.info("Er is geen resultaat voor param: @me en studentnummer: " + uid);
-                    throw new NotFoundException("No person found for searchparam @me");
+                    throw new NotFoundError("No person found for searchparam @me");
                 }
             } else {
-                Response.ResponseBuilder builder = Response.status(Response.Status.UNAUTHORIZED);
-                builder.entity("Not allowed.");
-                builder.type(MediaType.TEXT_PLAIN);
-                Response res = builder.build();
-                throw new WebApplicationException(res);
+                throw new UnauthorizedError("Not allowed");
             }
         }
 
@@ -89,7 +89,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             return student;
         } catch (NoResultException nre) {
             logger.info("Er is geen resultaat voor param: " + id);
-            throw new NotFoundException("No person found for searchparam " + id);
+            throw new NotFoundError("No person found for searchparam " + id);
         }
     }
 
@@ -98,59 +98,58 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
     @Produces({"application/json", "application/xml"})
     public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
 
-        EntityManager em = getEntityManager();
         try {
             Validator.checkLengthLastname(lastname);
             Validator.validateStringParameter(lastname);
         } catch (ValidationException ve) {
-            Response.ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
-            builder.entity(ve.getMessage());
-            builder.type(MediaType.TEXT_PLAIN);
-            Response res = builder.build();
-            throw new WebApplicationException(res);
+            logger.info("A client send a bad request: " + ve.getMessage());
+            throw new BadRequestError(ve.getMessage());
         }
 
-        String name = formatLastname(lastname);
-        Query query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
         Result result = new Result();
-        int maxResults;
-        int intOffset;
-        if (max != null && offset != null) {
-            logger.debug("Param max: " + max);
-            logger.debug("Param offset: " + offset);
-                        
-            maxResults = Integer.parseInt(max);
-            intOffset = Integer.parseInt(offset);
-                    
-            Query count = em.createNamedQuery("Students.getCount").setParameter("lastname", name);
-            int total = ((Long)count.getSingleResult()).intValue();
-            logger.debug("MaxResults: " + total);
-            
-            query.setMaxResults(maxResults);
-            query.setFirstResult(intOffset);
-            int nextOffset = intOffset + maxResults;
-            int previousOffset = intOffset - maxResults;
-            logger.debug("Previous offset: " + previousOffset);
-            if (nextOffset <= total) {
-                String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
-                result.setNext(next);
+        try {
+            EntityManager em = getEntityManager();
+            String name = formatLastname(lastname);
+            Query query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
+            int maxResults;
+            int intOffset;
+            if (max != null && offset != null) {
+                maxResults = Integer.parseInt(max);
+                intOffset = Integer.parseInt(offset);
+                Query count = em.createNamedQuery("Students.getCount").setParameter("lastname", name);
+
+                int total = ((Long) count.getSingleResult()).intValue();
+                logger.debug("Totaal: " + total);
+                if (total > 0) {
+                    result.setTotal(String.valueOf(total));
+                    logger.debug("MaxResults: " + total);
+                    query.setMaxResults(maxResults);
+                    query.setFirstResult(intOffset);
+                    int nextOffset = intOffset + maxResults;
+                    int previousOffset = intOffset - maxResults;
+                    if (nextOffset <= total) {
+                        String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                        result.setNext(next);
+                    }
+                    if (previousOffset > -1) {
+                        String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                        result.setPrevious(previous);
+                    }
+                } else {
+                    logger.info("No result found error occured " + lastname);
+                    throw new NotFoundError("No result found");
+                }
+            } else {
+                logger.debug("****geen pagination");
+                query.setFirstResult(0);
             }
-            if (previousOffset > -1) {
-                String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
-                result.setPrevious(previous);
-            }
-         } else {
-            query.setFirstResult(0);
+            List<Students> names = query.getResultList();
+            result.setResults(names);
+            names = buildLink(names);
+        } catch (Throwable t) {
+            logger.info("An internal error occurred: " + t.getMessage());
+            throw new InternalServerError("An internal error server occurred");
         }
-        
-        
-        List<Students> students = query.getResultList();
-        if (students.isEmpty()) {
-            logger.info("Er is geen resultaat voor param: " + lastname);
-            throw new NotFoundException("No person found for searchparam " + lastname);
-        }
-        students = buildLink(students);
-        result.setResults(students);
         return result;
     }
 
