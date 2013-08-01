@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -25,8 +27,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import nl.hsleiden.webapi.exception.BadRequestError;
+import nl.hsleiden.webapi.exception.InternalServerError;
+import nl.hsleiden.webapi.exception.NotFoundError;
+import nl.hsleiden.webapi.exception.UnauthorizedError;
 import nl.hsleiden.webapi.model.Employee;
 import nl.hsleiden.webapi.model.Employees;
+import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
 import org.apache.log4j.Logger;
@@ -69,14 +76,10 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
                     return employee;
                 } catch (NoResultException ne) {
                     logger.info("Er is geen resultaat voor param: @me en accountname: " + uid);
-                    throw new NotFoundException("No person found for searchparam @me");
+                    throw new NotFoundError("No person found for searchparam @me");
                 }
             } else {
-                Response.ResponseBuilder builder = Response.status(Response.Status.UNAUTHORIZED);
-                builder.entity("Not allowed.");
-                builder.type(MediaType.TEXT_PLAIN);
-                Response res = builder.build();
-                throw new WebApplicationException(res);
+                throw new UnauthorizedError("Not allowed");
             }
         }
         
@@ -92,32 +95,62 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     
     @GET
     @Path("{lastname}")
-    @Produces({"application/json","application/xml"}) 
-    public List<Employees> findByLastname(@PathParam("lastname") String lastname) {
-        logger.debug("In methode ");
+    @Produces({"application/json", "application/xml"})
+    public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
+
         try {
             Validator.checkLengthLastname(lastname);
             Validator.validateStringParameter(lastname);
         } catch (ValidationException ve) {
-            ResponseBuilder builder = Response.status(Response.Status.BAD_REQUEST);
-            builder.entity(ve.getMessage());
-            builder.type(MediaType.TEXT_PLAIN);
-            Response res = builder.build();
-            throw new WebApplicationException(res);
-        }      
-       
-        EntityManager em = getEntityManager();
-        String name = formatLastname(lastname);
-        
-        Query query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
-        List<Employees> names = query.getResultList();
-        
-        if (names.isEmpty()) {
-            logger.info("Er is geen resultaat voor param: " + lastname);
-            throw new NotFoundException("No person found for searchparam " + lastname);
+            logger.info("A client send a bad request: " + ve.getMessage());
+            throw new BadRequestError(ve.getMessage());
         }
-        names = buildLink(names);
-        return names;
+        
+        Result result = new Result();
+        try {
+            EntityManager em = getEntityManager();
+            String name = formatLastname(lastname);
+            Query query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
+            int maxResults;
+            int intOffset;
+            if (max != null && offset != null) {
+                maxResults = Integer.parseInt(max);
+                intOffset = Integer.parseInt(offset);
+                Query count = em.createNamedQuery("Employees.getCount").setParameter("lastname", name);
+
+                int total = ((Long) count.getSingleResult()).intValue();
+                logger.debug("Totaal: " + total);
+                if (total > 0) {
+                    result.setTotal(String.valueOf(total));
+                    logger.debug("MaxResults: " + total);
+                    query.setMaxResults(maxResults);
+                    query.setFirstResult(intOffset);
+                    int nextOffset = intOffset + maxResults;
+                    int previousOffset = intOffset - maxResults;
+                    if (nextOffset <= total) {
+                        String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                        result.setNext(next);
+                    }
+                    if (previousOffset > -1) {
+                        String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                        result.setPrevious(previous);
+                    }
+                } else {
+                    logger.info("No result found error occured " + lastname);
+                    throw new NotFoundError("No result found");
+                }
+            } else {
+                logger.debug("****geen pagination");
+                query.setFirstResult(0);
+            }
+            List<Employees> names = query.getResultList();
+            result.setResults(names);
+            names = buildLink(names);
+        } catch (Throwable t) {
+            logger.info("An internal error occurred: " + t.getMessage());
+            throw new InternalServerError("An internal error server occurred");
+        }
+        return result;
     }
 
     @Override
@@ -125,11 +158,12 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         emf = Persistence.createEntityManagerFactory("apis.hsleiden.nl");
         return emf.createEntityManager();
     }
-    
+
     /**
      * Formats lastname for a case insensitive search
+     *
      * @param lastname
-     * @return 
+     * @return
      */
     private String formatLastname(String lastname) {
         StringBuilder sb = new StringBuilder();
@@ -152,5 +186,13 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
             n.setUri(userUri.toString());
         }
         return names;
+    }
+    
+    private String createpagingLink(String param, String max, String offset) {
+        String hostname = request.getServerName();
+        UriBuilder ub = uriInfo.getBaseUriBuilder();
+        URI userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
+        
+        return userUri.toString();
     }
 }
