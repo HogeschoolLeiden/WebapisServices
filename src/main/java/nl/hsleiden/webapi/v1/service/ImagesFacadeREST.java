@@ -4,7 +4,6 @@
  */
 package nl.hsleiden.webapi.v1.service;
 
-import com.sun.jersey.api.NotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
@@ -15,6 +14,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import nl.hsleiden.webapi.exception.NotFoundError;
 import nl.hsleiden.webapi.model.Images;
 import org.apache.log4j.Logger;
 
@@ -47,7 +47,7 @@ public class ImagesFacadeREST extends AbstractFacade<Images> {
             image = (Images) query.getSingleResult();
         } catch (NoResultException ne) {
             logger.info("Er is geen resultaat voor studentnummer: " + id);
-            throw new NotFoundException("No person found for searchparam " + id);
+            throw new NotFoundError("No person found for searchparam " + id);
         }
         return image;
     }
