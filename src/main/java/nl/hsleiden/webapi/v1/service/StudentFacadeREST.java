@@ -4,7 +4,6 @@
  */
 package nl.hsleiden.webapi.v1.service;
 
-import com.sun.jersey.api.NotFoundException;
 import java.net.URI;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -19,10 +18,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import nl.hsleiden.webapi.exception.BadRequestError;
