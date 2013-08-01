@@ -22,6 +22,15 @@ public class Result<T> {
     private List<T> results;
     private String previous;
     private String next;
+    private String total;
+
+    public String getTotal() {
+        return total;
+    }
+
+    public void setTotal(String total) {
+        this.total = total;
+    }
 
 
     @XmlMixed
