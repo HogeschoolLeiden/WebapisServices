@@ -198,7 +198,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
     private String createpagingLink(String param, String max, String offset) {
         String hostname = request.getServerName();
         UriBuilder ub = uriInfo.getBaseUriBuilder();
-        URI userUri = ub.host(hostname).port(8080).path(StudentFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
+        URI userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
         
         return userUri.toString();
     }
