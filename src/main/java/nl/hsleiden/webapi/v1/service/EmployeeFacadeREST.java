@@ -183,11 +183,13 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     private List<Employees> buildLink(List<Employees> names) {
         
         String hostname = request.getServerName();
-        UriBuilder ub = uriInfo.getBaseUriBuilder();
+        
         for (Employees n : names) {
+            UriBuilder ub = uriInfo.getBaseUriBuilder();
             URI userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/id/").path(n.getId()).build();
             n.setUri(userUri.toString());
         }
+        
         return names;
     }
     
