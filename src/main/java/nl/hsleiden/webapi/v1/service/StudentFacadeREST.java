@@ -103,48 +103,58 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         }
 
         Result result = new Result();
-        try {
-            EntityManager em = getEntityManager();
-            String name = formatLastname(lastname);
-            Query query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
-            int maxResults;
-            int intOffset;
-            if (max != null && offset != null) {
+        
+        EntityManager em = getEntityManager();
+        String name = formatLastname(lastname);
+        Query query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
+        int maxResults;
+        int intOffset;
+        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
+            try {
                 maxResults = Integer.parseInt(max);
                 intOffset = Integer.parseInt(offset);
-                Query count = em.createNamedQuery("Students.getCount").setParameter("lastname", name);
+            } catch (NumberFormatException n) {
+                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+            }
+            if (maxResults < 0 || intOffset < 0) {
+                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+            }
+            Query count = em.createNamedQuery("Students.getCount").setParameter("lastname", name);
 
-                int total = ((Long) count.getSingleResult()).intValue();
-                logger.debug("Totaal: " + total);
-                if (total > 0) {
-                    result.setTotal(String.valueOf(total));
-                    logger.debug("MaxResults: " + total);
-                    query.setMaxResults(maxResults);
-                    query.setFirstResult(intOffset);
-                    int nextOffset = intOffset + maxResults;
-                    int previousOffset = intOffset - maxResults;
-                    if (nextOffset <= total) {
-                        String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
-                        result.setNext(next);
-                    }
-                    if (previousOffset > -1) {
-                        String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
-                        result.setPrevious(previous);
-                    }
-                } else {
-                    logger.info("No result found error occured " + lastname);
-                    throw new NotFoundError("No result found");
+            int total = ((Long) count.getSingleResult()).intValue();
+            logger.debug("Totaal: " + total);
+            if (total > 0) {
+                result.setTotal(String.valueOf(total));
+                logger.debug("MaxResults: " + total);
+                query.setMaxResults(maxResults);
+                query.setFirstResult(intOffset);
+                int nextOffset = intOffset + maxResults;
+                int previousOffset = intOffset - maxResults;
+                if (nextOffset <= total) {
+                    String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                    result.setNext(next);
+                }
+                if (previousOffset > -1) {
+                    String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                    result.setPrevious(previous);
                 }
             } else {
-                logger.debug("****geen pagination");
-                query.setFirstResult(0);
+                logger.info("No result found error occured " + lastname);
+                throw new NotFoundError("No result found");
             }
-            List<Students> names = query.getResultList();
+        } else {
+            logger.debug("****geen pagination");
+            query.setFirstResult(0);
+        }
+        List<Students> names = query.getResultList();
+        if (names.size() > 0) {
             result.setResults(names);
             names = buildLink(names);
-        } catch (Throwable t) {
-            logger.info("An internal error occurred: " + t.getMessage());
-            throw new InternalServerError("An internal error server occurred");
+        } else {
+            logger.info("No result found for lastname: " + lastname);
+            throw new NotFoundError("No result found " + lastname);
         }
         return result;
     }
