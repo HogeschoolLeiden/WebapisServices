@@ -56,8 +56,7 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     @Produces({"application/json", "application/xml"})
     public Employee findById(@PathParam("id") String id) {
         EntityManager em = getEntityManager();
-        
-        
+          
         if (id.equals("@me")) {
             String uid = (String) request.getAttribute("uid");
             String organisation = (String) request.getAttribute("homeOrganisation");
@@ -77,7 +76,6 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
                 throw new UnauthorizedError("Not allowed");
             }
         }
-        
         Query query = em.createNamedQuery("Employee.findById").setParameter("id", id);
         try {
             Employee employee = (Employee) query.getSingleResult();
@@ -102,48 +100,58 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         }
         
         Result result = new Result();
-        try {
-            EntityManager em = getEntityManager();
-            String name = formatLastname(lastname);
-            Query query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
-            int maxResults;
-            int intOffset;
-            if (max != null && offset != null) {
+        EntityManager em = getEntityManager();
+        String name = formatLastname(lastname);
+        Query query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
+        int maxResults = -1;
+        int intOffset = -1;
+        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
+            try {
                 maxResults = Integer.parseInt(max);
                 intOffset = Integer.parseInt(offset);
-                Query count = em.createNamedQuery("Employees.getCount").setParameter("lastname", name);
+            } catch (NumberFormatException n) {
+                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+            }
 
-                int total = ((Long) count.getSingleResult()).intValue();
-                logger.debug("Totaal: " + total);
-                if (total > 0) {
-                    result.setTotal(String.valueOf(total));
-                    logger.debug("MaxResults: " + total);
-                    query.setMaxResults(maxResults);
-                    query.setFirstResult(intOffset);
-                    int nextOffset = intOffset + maxResults;
-                    int previousOffset = intOffset - maxResults;
-                    if (nextOffset <= total) {
-                        String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
-                        result.setNext(next);
-                    }
-                    if (previousOffset > -1) {
-                        String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
-                        result.setPrevious(previous);
-                    }
-                } else {
-                    logger.info("No result found error occured " + lastname);
-                    throw new NotFoundError("No result found");
+            if (maxResults < 0 || intOffset < 0) {
+                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+            }
+            Query count = em.createNamedQuery("Employees.getCount").setParameter("lastname", name);
+
+            int total = ((Long) count.getSingleResult()).intValue();
+            logger.debug("Totaal: " + total);
+            if (total > 0) {
+                result.setTotal(String.valueOf(total));
+                logger.debug("MaxResults: " + total);
+                query.setMaxResults(maxResults);
+                query.setFirstResult(intOffset);
+                int nextOffset = intOffset + maxResults;
+                int previousOffset = intOffset - maxResults;
+                if (nextOffset <= total) {
+                    String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                    result.setNext(next);
+                }
+                if (previousOffset > -1) {
+                    String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                    result.setPrevious(previous);
                 }
             } else {
-                logger.debug("****geen pagination");
-                query.setFirstResult(0);
+                logger.info("No result found error occured " + lastname);
+                throw new NotFoundError("No result found " + lastname);
             }
-            List<Employees> names = query.getResultList();
+        } else {
+            logger.debug("****geen pagination");
+            query.setFirstResult(0);
+        }
+        List<Employees> names = query.getResultList();
+        if (names.size() > 0) {
             result.setResults(names);
             names = buildLink(names);
-        } catch (Throwable t) {
-            logger.info("An internal error occurred: " + t.getMessage());
-            throw new InternalServerError("An internal error server occurred");
+        } else {
+            logger.info("No result found for lastname: " + lastname);
+            throw new NotFoundError("No result found " + lastname);
         }
         return result;
     }
