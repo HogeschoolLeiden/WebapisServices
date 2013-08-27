@@ -44,10 +44,10 @@ public class Student implements Serializable {
     @Size(max = 2147483647)
     @Column(name = "geslacht")
     private String gender;
-//    @Size(max = 2147483647)
+    @Size(max = 2147483647)
 //    @Column(name = "emailhogeschool")
 //    private String emailaddress;
-    @Size(max = 2147483647)
+//    @Size(max = 2147483647)
     @Column(name = "tussenvoegsel")
     private String inserts;
     @Size(max = 2147483647)

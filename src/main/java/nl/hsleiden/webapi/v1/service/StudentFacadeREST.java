@@ -5,6 +5,7 @@
 package nl.hsleiden.webapi.v1.service;
 
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -27,6 +28,7 @@ import nl.hsleiden.webapi.exception.NotFoundError;
 import nl.hsleiden.webapi.exception.UnauthorizedError;
 import nl.hsleiden.webapi.model.Student;
 import nl.hsleiden.webapi.model.Students;
+import nl.hsleiden.webapi.model.UpdatedGradeStudent;
 import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
@@ -159,6 +161,24 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         return result;
     }
 
+    @GET
+    @Path("/grades/{date}")
+    @Produces({"application/xml", "application/json"})
+    public Result findByLastUpdate(@PathParam("date") String date) {
+        logger.debug("In method findbylastupdate: " + date);
+        Result result = new Result();
+        Timestamp ts = Timestamp.valueOf(date);
+        
+        EntityManager em = getEntityManager();
+        logger.debug("timestamp: " + ts);
+        Query query = em.createNamedQuery("UpdatedGradeStudent.findByUpdate").setParameter("cijfer_gesignaleerd", ts);
+        List<UpdatedGradeStudent> students = query.getResultList();
+           
+        result.setResults(students);
+        result.setTotal(String.valueOf(students.size()));
+        return result;
+    }
+    
     @Override
     protected EntityManager getEntityManager() {
         emf = Persistence.createEntityManagerFactory("apis.hsleiden.nl");
