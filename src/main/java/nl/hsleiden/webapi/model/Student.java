@@ -45,9 +45,9 @@ public class Student implements Serializable {
     @Column(name = "geslacht")
     private String gender;
     @Size(max = 2147483647)
-//    @Column(name = "emailhogeschool")
-//    private String emailaddress;
-//    @Size(max = 2147483647)
+    @Column(name = "emailhogeschool")
+    private String emailaddress;
+    @Size(max = 2147483647)
     @Column(name = "tussenvoegsel")
     private String inserts;
     @Size(max = 2147483647)
@@ -121,13 +121,13 @@ public class Student implements Serializable {
         this.gender = gender;
     }
 
-//    public String getEmailaddress() {
-//        return emailaddress;
-//    }
-//
-//    public void setEmailaddress(String emailaddress) {
-//        this.emailaddress = emailaddress;
-//    }
+    public String getEmailaddress() {
+        return emailaddress;
+    }
+
+    public void setEmailaddress(String emailaddress) {
+        this.emailaddress = emailaddress;
+    }
 
     public String getInserts() {
         return inserts;
