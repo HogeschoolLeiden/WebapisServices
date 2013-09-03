@@ -51,19 +51,19 @@ public class Employee implements Serializable {
     private String emailaddress;
     @Size(max = 15)
     @Column(name = "telefoonvast")
-    private String phonenumberhl;
+    private String phonenumberHl;
     @Size(max = 15)
     @Column(name = "mobielhogeschool")
-    private String mobilehl;
+    private String mobileHl;
     @Size(max = 15)
     @Column(name = "locatie")
     private String location;
     @Size(max = 15)
     @Column(name = "functienaam")
-    private String functiondescription;
+    private String functionDescription;
     @Size(max = 15)
     @Column(name = "medewerkernummer")
-    private String employeenumber;
+    private String employeeNumber;
     @Column(name = "afdeling")
     private String department;
     @Column(name = "homeorganisation")
@@ -114,7 +114,7 @@ public class Employee implements Serializable {
     }
 
     public Employee(String employeenumber) {
-        this.employeenumber = employeenumber;
+        this.employeeNumber = employeenumber;
     }
 
    public String getLastname() {
@@ -165,20 +165,20 @@ public class Employee implements Serializable {
         this.emailaddress = emailaddress;
     }
 
-    public String getPhonenumberhl() {
-        return phonenumberhl;
+    public String getPhonenumberHl() {
+        return phonenumberHl;
     }
 
-    public void setPhonenumberhl(String phonenumberhl) {
-        this.phonenumberhl = phonenumberhl;
+    public void setPhonenumberHl(String phonenumberhl) {
+        this.phonenumberHl = phonenumberhl;
     }
 
-    public String getMobilehl() {
-        return mobilehl;
+    public String getMobileHl() {
+        return mobileHl;
     }
 
-    public void setMobilehl(String mobilehl) {
-        this.mobilehl = mobilehl;
+    public void setMobileHl(String mobilehl) {
+        this.mobileHl = mobilehl;
     }
 
     public String getLocation() {
@@ -189,20 +189,20 @@ public class Employee implements Serializable {
         this.location = location;
     }
 
-    public String getFunctiondescription() {
-        return functiondescription;
+    public String getFunctionDescription() {
+        return functionDescription;
     }
 
-    public void setFunctiondescription(String functiondescription) {
-        this.functiondescription = functiondescription;
+    public void setFunctionDescription(String functiondescription) {
+        this.functionDescription = functiondescription;
     }
 
-    public String getEmployeenumber() {
-        return employeenumber;
+    public String getEmployeeNumber() {
+        return employeeNumber;
     }
 
-    public void setEmployeenumber(String employeenumber) {
-        this.employeenumber = employeenumber;
+    public void setEmployeeNumber(String employeenumber) {
+        this.employeeNumber = employeenumber;
     }
 
     @Override

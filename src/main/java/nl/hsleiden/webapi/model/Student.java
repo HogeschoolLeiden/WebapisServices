@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Student.findById", query = "SELECT s FROM Student s WHERE s.id = :id"),
-    @NamedQuery(name = "Student.findByStudentnumber", query = "SELECT s FROM Student s WHERE s.studentnumber = :studentnumber AND s.organisation = :organisation")})
+    @NamedQuery(name = "Student.findByStudentnumber", query = "SELECT s FROM Student s WHERE s.studentNumber = :studentnumber AND s.organisation = :organisation")})
 public class Student implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -52,7 +52,7 @@ public class Student implements Serializable {
     private String inserts;
     @Size(max = 2147483647)
     @Column(name = "studentnummer")
-    private String studentnumber;
+    private String studentNumber;
     @Size(max = 2147483647)
     @Column(name = "cluster")
     private String cluster;
@@ -61,7 +61,7 @@ public class Student implements Serializable {
     private String education;
     @Size(max = 2147483647)
     @Column(name = "studiejaar")
-    private String yearofstudy;
+    private String yearOfStudy;
     @Size(max = 2147483647)
     @Column(name = "klas")
     private String klas;
@@ -137,12 +137,12 @@ public class Student implements Serializable {
         this.inserts = inserts;
     }
 
-    public String getStudentnumber() {
-        return studentnumber;
+    public String getStudentNumber() {
+        return studentNumber;
     }
 
-    public void setStudentnumber(String studentnumber) {
-        this.studentnumber = studentnumber;
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
     public String getCluster() {
@@ -161,12 +161,12 @@ public class Student implements Serializable {
         this.education = education;
     }
 
-    public String getYearofstudy() {
-        return yearofstudy;
+    public String getYearOfStudy() {
+        return yearOfStudy;
     }
 
-    public void setYearofstudy(String yearofstudy) {
-        this.yearofstudy = yearofstudy;
+    public void setYearOfStudy(String yearOfStudy) {
+        this.yearOfStudy = yearOfStudy;
     }
 
     public String getKlas() {

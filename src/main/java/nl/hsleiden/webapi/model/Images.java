@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "Images.findAll", query = "SELECT i FROM Images i"),
-    @NamedQuery(name = "Images.findByStudentnumber", query = "SELECT i FROM Images i WHERE i.studentnumber = :studentnumber")})
+    @NamedQuery(name = "Images.findByStudentnumber", query = "SELECT i FROM Images i WHERE i.studentNumber = :studentNumber")})
 public class Images implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -33,7 +33,7 @@ public class Images implements Serializable {
     @NotNull
     @Size(min = 1, max = 2147483647)
     @Column(name = "studentnumber")
-    private String studentnumber;
+    private String studentNumber;
     @Column(name = "image")
     private byte[] image;
 
@@ -41,15 +41,15 @@ public class Images implements Serializable {
     }
 
     public Images(String studentnumber) {
-        this.studentnumber = studentnumber;
+        this.studentNumber = studentnumber;
     }
 
-    public String getStudentnumber() {
-        return studentnumber;
+    public String getStudentNumber() {
+        return studentNumber;
     }
 
-    public void setStudentnumber(String studentnumber) {
-        this.studentnumber = studentnumber;
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
     public byte[] getImage() {
@@ -63,7 +63,7 @@ public class Images implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (studentnumber != null ? studentnumber.hashCode() : 0);
+        hash += (studentNumber != null ? studentNumber.hashCode() : 0);
         return hash;
     }
 
@@ -74,7 +74,7 @@ public class Images implements Serializable {
             return false;
         }
         Images other = (Images) object;
-        if ((this.studentnumber == null && other.studentnumber != null) || (this.studentnumber != null && !this.studentnumber.equals(other.studentnumber))) {
+        if ((this.studentNumber == null && other.studentNumber != null) || (this.studentNumber != null && !this.studentNumber.equals(other.studentNumber))) {
             return false;
         }
         return true;
@@ -82,7 +82,7 @@ public class Images implements Serializable {
 
     @Override
     public String toString() {
-        return "nl.hsleiden.webapi.model.Images[ studentnumber=" + studentnumber + " ]";
+        return "nl.hsleiden.webapi.model.Images[ studentnumber=" + studentNumber + " ]";
     }
     
 }

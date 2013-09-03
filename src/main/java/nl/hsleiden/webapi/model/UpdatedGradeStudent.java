@@ -27,13 +27,13 @@ import nl.hsleiden.webapi.util.TimestampAdapter;
 @Table(name = "viewstudent")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "UpdatedGradeStudent.findByUpdate", query = "SELECT s FROM UpdatedGradeStudent s WHERE s.cijfer_gesignaleerd >= :cijfer_gesignaleerd")})
+    @NamedQuery(name = "UpdatedGradeStudent.findByUpdate", query = "SELECT s FROM UpdatedGradeStudent s WHERE s.gradesUpdated >= :cijfer_gesignaleerd")})
 public class UpdatedGradeStudent implements Serializable {
     private static final long serialVersionUID = 1L;
  
     @Id
     @Column(name = "studentnummer")
-    private String studentnumber;
+    private String studentNumber;
     @Size(max = 2147483647)
     
     @Column(name = "homeorganisation")
@@ -43,23 +43,23 @@ public class UpdatedGradeStudent implements Serializable {
      * 
      */
     @Column(name = "cijfer_gesignaleerd")
-    private Timestamp cijfer_gesignaleerd;
+    private Timestamp gradesUpdated;
 
     @XmlJavaTypeAdapter( TimestampAdapter.class)
-    public Timestamp getCijfer_gesignaleerd() {
-        return cijfer_gesignaleerd;
+    public Timestamp getGradesUpdated() {
+        return gradesUpdated;
     }
 
-    public void setCijfer_gesignaleerd(Timestamp cijfer_gesignaleerd) {
-        this.cijfer_gesignaleerd = cijfer_gesignaleerd;
+    public void setGradesUpdated(Timestamp gradesUpdated) {
+        this.gradesUpdated = gradesUpdated;
     }
 
-    public String getStudentnumber() {
-        return studentnumber;
+    public String getStudentNumber() {
+        return studentNumber;
     }
 
-    public void setStudentnumber(String studentnumber) {
-        this.studentnumber = studentnumber;
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
     public String getOrganisation() {
@@ -72,7 +72,7 @@ public class UpdatedGradeStudent implements Serializable {
    
     @Override
     public String toString() {
-        return "nl.hsleiden.webapi.model.UpdatedGradeStudent[ studentnumber=" + studentnumber + " ]";
+        return "nl.hsleiden.webapi.model.UpdatedGradeStudent[ studentnumber=" + studentNumber + " ]";
     }
     
     @Override
@@ -82,7 +82,7 @@ public class UpdatedGradeStudent implements Serializable {
             return false;
         }
         UpdatedGradeStudent other = (UpdatedGradeStudent) object;
-        if ((this.studentnumber == null && other.studentnumber != null) || (this.studentnumber != null && !this.studentnumber.equals(other.studentnumber))) {
+        if ((this.studentNumber == null && other.studentNumber != null) || (this.studentNumber != null && !this.studentNumber.equals(other.studentNumber))) {
             return false;
         }
         return true;
@@ -91,7 +91,7 @@ public class UpdatedGradeStudent implements Serializable {
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (studentnumber != null ? studentnumber.hashCode() : 0);
+        hash += (studentNumber != null ? studentNumber.hashCode() : 0);
         return hash;
     }
 
