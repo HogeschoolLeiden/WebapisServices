@@ -4,7 +4,7 @@
  */
 package nl.hsleiden.webapi.v1.service;
 
-import com.sun.jersey.api.NotFoundException;
+//import com.sun.jersey.api.NotFoundException;
 import java.net.URI;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -15,6 +15,7 @@ import javax.persistence.Query;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -23,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import nl.hsleiden.webapi.exception.BadRequestError;
-import nl.hsleiden.webapi.exception.InternalServerError;
 import nl.hsleiden.webapi.exception.NotFoundError;
 import nl.hsleiden.webapi.exception.UnauthorizedError;
 import nl.hsleiden.webapi.model.Employee;
