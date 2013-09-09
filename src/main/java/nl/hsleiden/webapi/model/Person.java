@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewpersoon")
 @XmlRootElement
 @NamedQueries({
+    @NamedQuery(name="Person.findAll", query = "SELECT p FROM Person p"),
     @NamedQuery(name = "Person.findByLastname", query = "SELECT p FROM Person p WHERE lower(p.lastname) LIKE :lastname ORDER by p.lastname"), 
     @NamedQuery(name = "Person.getCount", query = "SELECT COUNT(p) FROM Person p WHERE lower(p.lastname) LIKE :lastname")})
 public class Person implements Serializable {

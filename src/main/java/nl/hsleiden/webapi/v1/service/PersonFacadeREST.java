@@ -5,7 +5,6 @@
 package nl.hsleiden.webapi.v1.service;
 
 import java.net.URI;
-import java.sql.Timestamp;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -24,8 +23,6 @@ import javax.ws.rs.core.UriBuilder;
 import nl.hsleiden.webapi.exception.BadRequestError;
 import nl.hsleiden.webapi.exception.NotFoundError;
 import nl.hsleiden.webapi.model.Person;
-import nl.hsleiden.webapi.model.Students;
-import nl.hsleiden.webapi.model.UpdatedGradeStudent;
 import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
@@ -56,6 +53,23 @@ public class PersonFacadeREST {
     public PersonFacadeREST() {
     }
 
+    @GET
+    @Produces({"application/json", "application/xml"})   
+    public Result findAll() {
+        EntityManager em = getEntityManager();
+        Result result = new Result();
+        Query query = em.createNamedQuery("Person.findAll");
+        List<Person> names = query.getResultList();
+        if (names.size() > 0) {
+            result.setResults(names);
+            buildLink(names);
+            if (result.getTotal() == null) {
+                result.setTotal(String.valueOf(names.size()));
+            }
+        } 
+        return result;
+        
+    }
     /**
      * Retrieves representation of an instance of nl.hsleiden.webapi.v1.service.PersonFacadeREST
      * @return an instance of java.lang.String
@@ -63,7 +77,7 @@ public class PersonFacadeREST {
     @GET
     @Path("{lastname}")
     @Produces({"application/json", "application/xml"})
-    public Result getPersonsByLastName(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
+    public Result findPersonsByLastName(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
     
         try {
             Validator.checkLengthLastname(lastname);
