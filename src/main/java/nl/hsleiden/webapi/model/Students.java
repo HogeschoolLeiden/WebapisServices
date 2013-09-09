@@ -23,8 +23,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewstudent")
 @XmlRootElement(name="students")
 @NamedQueries({
-    @NamedQuery(name = "Students.findByLastname", query = "SELECT l FROM Students l WHERE lower(l.lastname) LIKE :lastname ORDER by l.lastname"),
-    @NamedQuery(name = "Students.getCount", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname")})
+    @NamedQuery(name = "Students.findAll()", query = "SELECT s FROM Students s"),
+    @NamedQuery(name = "Students.findAllForEducation()", query = "SELECT s FROM Students s WHERE s.education = :education"),
+    @NamedQuery(name = "Students.findByLastname", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname ORDER by s.lastname"),
+    @NamedQuery(name = "Students.findByLastnameAndEducation", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname AND s.education = :education ORDER by s.lastname"),
+    @NamedQuery(name = "Students.getCount", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Students.getCountAll", query = "SELECT COUNT(s) FROM Students s"),
+    @NamedQuery(name = "Students.getCountAllForEducation", query = "SELECT COUNT(s) FROM Students s WHERE s.education LIKE :education")})
 public class Students implements Serializable {
     private static final long serialVersionUID = 1L;
     
@@ -38,6 +43,8 @@ public class Students implements Serializable {
     @Size(max = 15)
     @Column(name = "achternaam")
     private String lastname;
+    @Column(name = "opleiding")
+    private String education;
     @Transient
     private String uri; 
 
@@ -63,6 +70,14 @@ public class Students implements Serializable {
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
+    }
+
+    public String getEducation() {
+        return education;
+    }
+
+    public void setEducation(String education) {
+        this.education = education;
     }
 
     public String getUri() {
