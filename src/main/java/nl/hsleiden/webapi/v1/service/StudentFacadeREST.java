@@ -20,7 +20,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 import nl.hsleiden.webapi.exception.BadRequestError;
@@ -29,20 +28,11 @@ import nl.hsleiden.webapi.exception.UnauthorizedError;
 import nl.hsleiden.webapi.model.Student;
 import nl.hsleiden.webapi.model.Students;
 import nl.hsleiden.webapi.model.UpdatedGradeStudent;
-import nl.hsleiden.webapi.util.Common;
 import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
 import org.apache.log4j.Logger;
-import org.apache.oltu.oauth2.common.OAuth;
-import org.apache.oltu.oauth2.common.error.OAuthError;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
-import org.apache.oltu.oauth2.common.message.OAuthResponse;
-import org.apache.oltu.oauth2.common.message.types.ParameterStyle;
-import org.apache.oltu.oauth2.common.utils.OAuthUtils;
-import org.apache.oltu.oauth2.rs.request.OAuthAccessResourceRequest;
-import org.apache.oltu.oauth2.rs.response.OAuthRSResponse;
 
 /**
  *
@@ -105,32 +95,8 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
     @Path("{lastname}")
     @Produces({"application/json", "application/xml"})
     public Result findByLastname(@Context HttpServletRequest request, @PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) throws OAuthSystemException {
-     logger.debug("In methode"); 
-     
-     String authzHeader = request.getHeader(OAuth.HeaderType.AUTHORIZATION);
-     logger.debug("authHeader:  " + authzHeader);
-        if (OAuthUtils.isEmpty(authzHeader)) {
-            throw new BadRequestError( "Missing authorization header.");
-        }
-    try {    
-        logger.debug("In try");  
-        OAuthAccessResourceRequest oauthRequest = new OAuthAccessResourceRequest(request,
-                ParameterStyle.HEADER);
-        logger.debug("oauthrequest uitgevraagd");  
-        // Get the access token
-        String accessToken = oauthRequest.getAccessToken();
-        logger.debug("Accestoken: " + accessToken);
-        // Validate the access token
-        logger.debug("ACCESS_TOKEN " + Common.ACCESS_TOKEN_VALID);
-        if (!Common.ACCESS_TOKEN_VALID.equals(accessToken)) {
-            logger.debug("accesstoken compared " + accessToken);
-            // Return the OAuth error message
-            OAuthResponse oauthResponse = OAuthRSResponse
-                    .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                    .setRealm(Common.RESOURCE_SERVER_NAME)
-                    .setError(OAuthError.ResourceResponse.INVALID_TOKEN)
-                    .buildHeaderMessage();
-        } else {
+        logger.debug("In methode");
+
         try {
             Validator.checkLengthLastname(lastname);
             Validator.validateStringParameter(lastname);
@@ -194,25 +160,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             throw new NotFoundError("No result found " + lastname);
         }
         return result;
-      }
-    }
-     catch (OAuthProblemException e) {
-            // Check if the error code has been set
-            String errorCode = e.getError();
-            if (OAuthUtils.isEmpty(errorCode)) {
 
-                // Return the OAuth error message
-                OAuthResponse oauthResponse = OAuthRSResponse
-                    .errorResponse(HttpServletResponse.SC_UNAUTHORIZED)
-                    .setRealm(Common.RESOURCE_SERVER_NAME)
-                    .buildHeaderMessage();
-            }
-            throw new BadRequestError("Dit gaat fout " + e.getMessage() );
-    }
-       return null;
-        
-       
-    
     }
 
     @GET

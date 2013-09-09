@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import nl.hsleiden.webapi.model.Employees;
+import nl.hsleiden.webapi.model.Person;
 import nl.hsleiden.webapi.model.Students;
 import nl.hsleiden.webapi.model.UpdatedGradeStudent;
 
@@ -17,7 +18,7 @@ import nl.hsleiden.webapi.model.UpdatedGradeStudent;
  * @author hl
  */
 @XmlRootElement(name="results")
-@XmlSeeAlso({Students.class, Employees.class, UpdatedGradeStudent.class})
+@XmlSeeAlso({Students.class, Employees.class, UpdatedGradeStudent.class, Person.class})
 public class Result<T> {
     
     private List<T> results;
