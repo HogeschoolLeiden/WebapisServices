@@ -39,7 +39,7 @@ public class Student implements Serializable {
     @Column(name = "achternaam")
     private String lastname;
     @Size(max = 2147483647)
-    @Column(name = "voornamen")
+    @Column(name = "roepnaam")
     private String givenname;
     @Size(max = 2147483647)
     @Column(name = "geslacht")

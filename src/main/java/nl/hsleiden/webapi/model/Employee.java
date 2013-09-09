@@ -35,7 +35,7 @@ public class Employee implements Serializable {
     @Column(name = "achternaam")
     private String lastname;
     @Size(max = 15)
-    @Column(name = "voornamen")
+    @Column(name = "roepnaam")
     private String givenname;
     @Size(max = 15)
     @Column(name = "naamlijst")
