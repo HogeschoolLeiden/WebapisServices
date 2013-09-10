@@ -35,7 +35,7 @@ public class Persons implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 15)
-    @Column(name = "id")
+    @Column(name = "idpersoon")
     private String id;
     @Size(max = 15)
     @Column(name = "studentnummer")
@@ -43,46 +43,29 @@ public class Persons implements Serializable {
     @Size(max = 50)
     @Column(name = "medewerkernummer")
     private String employeeNumber;
-    @Size(max = 15)
-    @Column(name = "roepnaam")
-    private String firstname;
     @Size(max = 50)
     @Column(name = "achternaam")
     private String lastname;
-    @Size(max = 50)
-    @Column(name = "naam_voluit")
-    private String fullname;
     @Size(max = 50)
     @Column(name = "naam_informeel")
     private String informalname;
     @Size(max = 50)
     @Column(name = "naam_lijst")
     private String listName;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "sys_actief")
-    private boolean sysActive;
+    @Size(max = 50)
+    @Column(name = "afdeling")
+    private String department;
+    @Size(max = 50)
+    @Column(name = "opleiding")
+    private String education;
     @Transient
     private String uri; 
 
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-    
     public Persons() {
     }
 
     public Persons(String id) {
         this.id = id;
-    }
-
-    public Persons(String id, boolean sysActief) {
-        this.id = id;
-        this.sysActive = sysActief;
     }
 
     public String getId() {
@@ -101,28 +84,12 @@ public class Persons implements Serializable {
         this.employeeNumber = employeeNumber;
     }
 
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
-    }
-
     public String getLastname() {
         return lastname;
     }
 
     public void setLastname(String lastname) {
         this.lastname = lastname;
-    }
-
-    public String getFullname() {
-        return fullname;
-    }
-
-    public void setFullname(String fullname) {
-        this.fullname = fullname;
     }
 
     public String getInformalname() {
@@ -149,14 +116,30 @@ public class Persons implements Serializable {
         this.studentNumber = studentNumber;
     }
 
-    public boolean getSysActive() {
-        return sysActive;
+    public String getUri() {
+        return uri;
     }
 
-    public void setSysActive(boolean sysActief) {
-        this.sysActive = sysActief;
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+    
+    public String getEducation() {
+        return education;
     }
 
+    public void setEducation(String education) {
+        this.education = education;
+    }
+    
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+    
     @Override
     public int hashCode() {
         int hash = 0;
@@ -179,7 +162,7 @@ public class Persons implements Serializable {
 
     @Override
     public String toString() {
-        return "nl.hsleiden.webapi.model.Persoon[ id=" + id + " ]";
+        return "nl.hsleiden.webapi.model.Persons[ id=" + id + " ]";
     }
     
 }
