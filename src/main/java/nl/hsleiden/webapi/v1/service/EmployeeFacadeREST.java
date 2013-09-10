@@ -282,16 +282,16 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
 //        return userUri.toString();
 //    }
     
-    private String createpagingLink(String lastname, String afdeling, String max, String offset) {
+    private String createpagingLink(String lastname, String department, String max, String offset) {
         String hostname = request.getServerName();
         UriBuilder ub = uriInfo.getBaseUriBuilder();
         URI userUri = null;
-        if (lastname != null && afdeling != null) {
-            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("education", afdeling).queryParam("max", max).queryParam("offset", offset).build();
+        if (lastname != null && department != null) {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else if (lastname != null) {
             userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("max", max).queryParam("offset", offset).build();
-        } else if (afdeling != null) {
-            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("education", afdeling).queryParam("max", max).queryParam("offset", offset).build();
+        } else if (department != null) {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else {
             userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("max", max).queryParam("offset", offset).build();
 
