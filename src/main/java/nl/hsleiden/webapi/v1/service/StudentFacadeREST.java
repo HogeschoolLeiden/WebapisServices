@@ -97,11 +97,13 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         EntityManager em = getEntityManager();
         Result result = new Result();
         Query query = null;
+        
         if (education != null && education.trim().length() > 0) {
             query = em.createNamedQuery("Students.findAllForEducation()").setParameter("education", education);
         } else {
             query = em.createNamedQuery("Students.findAll()");
         }
+        
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -150,6 +152,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             logger.debug("****geen pagination");
             query.setFirstResult(0);
         }
+        
         List<Students> names = query.getResultList();
         if (names.size() > 0) {
             result.setResults(names);
@@ -187,6 +190,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         } else {
             query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", name);
         }
+        
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -228,6 +232,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
             logger.debug("****geen pagination");
             query.setFirstResult(0);
         }
+        
         List<Students> names = query.getResultList();
         if (names.size() > 0) {
             result.setResults(names);

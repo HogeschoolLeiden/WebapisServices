@@ -25,10 +25,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewpersoon")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name="Person.findAll", query = "SELECT p FROM Person p"),
-    @NamedQuery(name = "Person.findByLastname", query = "SELECT p FROM Person p WHERE lower(p.lastname) LIKE :lastname ORDER by p.lastname"), 
-    @NamedQuery(name = "Person.getCount", query = "SELECT COUNT(p) FROM Person p WHERE lower(p.lastname) LIKE :lastname")})
-public class Person implements Serializable {
+    @NamedQuery(name = "Persons.findAll", query = "SELECT p FROM Persons p ORDER by p.lastname"),
+    @NamedQuery(name = "Persons.findByLastname", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname ORDER by p.lastname"), 
+    @NamedQuery(name = "Persons.getCount", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Persons.getCountAll", query = "SELECT COUNT(p) FROM Persons p")})
+public class Persons implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
@@ -72,14 +73,14 @@ public class Person implements Serializable {
         this.uri = uri;
     }
     
-    public Person() {
+    public Persons() {
     }
 
-    public Person(String id) {
+    public Persons(String id) {
         this.id = id;
     }
 
-    public Person(String id, boolean sysActief) {
+    public Persons(String id, boolean sysActief) {
         this.id = id;
         this.sysActive = sysActief;
     }
@@ -166,10 +167,10 @@ public class Person implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Person)) {
+        if (!(object instanceof Persons)) {
             return false;
         }
-        Person other = (Person) object;
+        Persons other = (Persons) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }

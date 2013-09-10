@@ -9,7 +9,7 @@
     <class>nl.hsleiden.webapi.model.Students</class>
     <class>nl.hsleiden.webapi.model.Images</class>
     <class>nl.hsleiden.webapi.model.UpdatedGradeStudent</class>
-    <class>nl.hsleiden.webapi.model.Person</class>
+    <class>nl.hsleiden.webapi.model.Persons</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
   </persistence-unit>
 </persistence>
