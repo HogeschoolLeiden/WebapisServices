@@ -23,8 +23,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewmedewerker")
 @XmlRootElement(name="employees")
 @NamedQueries({
+    @NamedQuery(name = "Employees.findAll()", query = "SELECT e FROM Employees e ORDER by e.lastname"),
+    @NamedQuery(name = "Employees.findAllForDepartment()", query = "SELECT e FROM Employees e WHERE e.department = :department ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findByLastname", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname ORDER by e.lastname"),
-    @NamedQuery(name = "Employees.getCount", query = "SELECT COUNT(e) FROM Employees e WHERE lower(e.lastname) LIKE :lastname")})
+    @NamedQuery(name = "Employees.findByLastnameAndDepartment", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname AND e.department = :department ORDER by e.lastname"),
+    @NamedQuery(name = "Employees.getCount", query = "SELECT COUNT(e) FROM Employees e WHERE lower(e.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Employees.getCountAll", query = "SELECT COUNT(e) FROM Employees e"),
+    @NamedQuery(name = "Employees.getCountAllForDepartment", query = "SELECT COUNT(e) FROM Employees e WHERE e.department = :department")})
 public class Employees implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -37,6 +42,8 @@ public class Employees implements Serializable {
     @Size(max = 15)
     @Column(name = "achternaam")
     private String lastname;
+    @Column(name = " afdeling")
+    private String department;
     @Transient
     private String uri; 
 
@@ -47,9 +54,15 @@ public class Employees implements Serializable {
     public void setUri(String uri) {
         this.uri = uri;
     }
-    
-    
-    
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+     
     public String getLastname() {
         return lastname;
     }

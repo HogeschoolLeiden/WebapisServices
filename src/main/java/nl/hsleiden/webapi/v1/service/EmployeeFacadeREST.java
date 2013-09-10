@@ -87,9 +87,83 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     }
     
     @GET
+    @Produces({"application/json", "application/xml"})
+    public Result findAll(@QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("department") String department) {
+        EntityManager em = getEntityManager();
+        Result result = new Result();
+        Query query = null;
+        
+        if (department != null && department.trim().length() > 0) {
+            query = em.createNamedQuery("Employees.findAllForDepartment()").setParameter("department", department);
+        } else {
+            query = em.createNamedQuery("Employees.findAll()");
+        }
+        
+        int maxResults;
+        int intOffset;
+        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
+            try {
+                maxResults = Integer.parseInt(max);
+                intOffset = Integer.parseInt(offset);
+            } catch (NumberFormatException n) {
+                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
+            }
+            if (maxResults < 0 || intOffset < 0) {
+                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
+            }
+            
+            Query count = null;
+            if (department != null && department.trim().length() > 0) {
+                logger.debug("******* department: " + department);
+                count = em.createNamedQuery("Employees.getCountAllForDepartment").setParameter("department", department);
+            } else {
+                department = null;
+                count = em.createNamedQuery("Employees.getCountAll");
+            }
+            int total = ((Long) count.getSingleResult()).intValue();
+            logger.debug("Totaal: " + total);
+            if (total > 0) {
+                result.setTotal(String.valueOf(total));
+                logger.debug("MaxResults: " + total);
+                query.setMaxResults(maxResults);
+                query.setFirstResult(intOffset);
+                int nextOffset = intOffset + maxResults;
+                int previousOffset = intOffset - maxResults;
+                if (nextOffset <= total) {
+                    String next = createpagingLink(null, department, max, String.valueOf(nextOffset));
+                    result.setNext(next);
+                }
+                if (previousOffset > -1) {
+                    String previous = createpagingLink(null, department, max, String.valueOf(previousOffset));
+                    result.setPrevious(previous);
+                }
+            } else {
+                logger.info("No result found error occured ");
+                throw new NotFoundError("No result found");
+            }
+        } else {
+            logger.debug("****geen pagination");
+            query.setFirstResult(0);
+        }
+        
+        List<Employees> names = query.getResultList();
+        if (names.size() > 0) {
+            result.setResults(names);
+            buildLink(names);
+            if (result.getTotal() == null) {
+                result.setTotal(String.valueOf(names.size()));
+            }
+        } 
+        return result;
+    }
+    
+    
+    @GET
     @Path("{lastname}")
     @Produces({"application/json", "application/xml"})
-    public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
+    public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("department") String department, @QueryParam("max") String max, @QueryParam("offset") String offset) {
 
         try {
             Validator.checkLengthLastname(lastname);
@@ -102,7 +176,14 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         Result result = new Result();
         EntityManager em = getEntityManager();
         String name = formatLastname(lastname);
-        Query query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
+        Query query = null;
+        if (department != null && department.trim().length() > 0) {
+            query = em.createNamedQuery("Employees.findByLastnameAndDepartment").setParameter("lastname", name);
+            query.setParameter("department", department);
+        } else {
+            query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
+        }
+        
         int maxResults = -1;
         int intOffset = -1;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -130,11 +211,11 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
                 int nextOffset = intOffset + maxResults;
                 int previousOffset = intOffset - maxResults;
                 if (nextOffset <= total) {
-                    String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
+                    String next = createpagingLink(lastname, department, max, String.valueOf(nextOffset));
                     result.setNext(next);
                 }
                 if (previousOffset > -1) {
-                    String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                    String previous = createpagingLink(lastname, department,  max, String.valueOf(previousOffset));
                     result.setPrevious(previous);
                 }
             } else {
@@ -193,11 +274,28 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         return names;
     }
     
-    private String createpagingLink(String param, String max, String offset) {
+//    private String createpagingLink(String param, String max, String offset) {
+//        String hostname = request.getServerName();
+//        UriBuilder ub = uriInfo.getBaseUriBuilder();
+//        URI userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
+//        
+//        return userUri.toString();
+//    }
+    
+    private String createpagingLink(String lastname, String afdeling, String max, String offset) {
         String hostname = request.getServerName();
         UriBuilder ub = uriInfo.getBaseUriBuilder();
-        URI userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
-        
+        URI userUri = null;
+        if (lastname != null && afdeling != null) {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("education", afdeling).queryParam("max", max).queryParam("offset", offset).build();
+        } else if (lastname != null) {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("max", max).queryParam("offset", offset).build();
+        } else if (afdeling != null) {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("education", afdeling).queryParam("max", max).queryParam("offset", offset).build();
+        } else {
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("max", max).queryParam("offset", offset).build();
+
+        }
         return userUri.toString();
     }
 }
