@@ -142,7 +142,7 @@ public class PersonFacadeREST {
 
         EntityManager em = getEntityManager();
         String name = formatLastname(lastname);
-        Query query = em.createNamedQuery("Person.findByLastname").setParameter("lastname", name);
+        Query query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", name);
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -157,7 +157,7 @@ public class PersonFacadeREST {
                 logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
                 throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
             }
-            Query count = em.createNamedQuery("Person.getCount").setParameter("lastname", name);
+            Query count = em.createNamedQuery("Persons.getCount").setParameter("lastname", name);
 
             int total = ((Long) count.getSingleResult()).intValue();
             logger.debug("Totaal: " + total);
