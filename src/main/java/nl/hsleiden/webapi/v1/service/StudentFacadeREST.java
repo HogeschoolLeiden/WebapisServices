@@ -250,7 +250,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
 
     @GET
     @Path("/grades/{date}")
-    @Produces({"application/xml", "application/json"})
+    @Produces({"application/json"})
     public Result findByLastUpdate(@PathParam("date") String date) {
         logger.debug("In method findbylastupdate: " + date);
         Result result = new Result();
