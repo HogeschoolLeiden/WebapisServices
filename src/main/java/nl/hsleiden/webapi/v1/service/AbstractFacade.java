@@ -4,7 +4,6 @@
  */
 package nl.hsleiden.webapi.v1.service;
 
-import java.util.List;
 import javax.persistence.EntityManager;
 
 /**
