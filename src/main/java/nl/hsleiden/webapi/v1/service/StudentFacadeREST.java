@@ -38,7 +38,7 @@ import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
  *
  * @author hl
  */
-@Path("v1/students")
+@Path("students")
 public class StudentFacadeREST extends AbstractFacade<Student> {
 
     private EntityManagerFactory emf;

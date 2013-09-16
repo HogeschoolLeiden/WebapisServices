@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  *
  * @author hl
  */
-@Path("v1/images")
+@Path("images")
 public class ImagesFacadeREST extends AbstractFacade<Images> {
     
     private EntityManagerFactory emf;

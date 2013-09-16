@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  *
  * @author hl
  */
-@Path("v1/person")
+@Path("person")
 public class PersonFacadeREST {
 
     private EntityManagerFactory emf;

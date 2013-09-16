@@ -3,15 +3,12 @@
     Created on : Aug 2, 2013, 11:03:02 AM
     Author     : hl
 --%>
+<%@page contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" isErrorPage="true"%>
 
-<%@ page isErrorPage="true" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>JSP Page</title>
-</head>
-<body>
-    <h1>Error</h1>
-</body>
-</html>
+
+<%
+    out.println("{ RequestUri : " + pageContext.getErrorData().getRequestURI() + ",");
+    out.println("HttpStatusCode : " + pageContext.getErrorData().getStatusCode() + ",");
+    out.println("ErrorMessage : " + pageContext.getException() + " }");
+
+%>

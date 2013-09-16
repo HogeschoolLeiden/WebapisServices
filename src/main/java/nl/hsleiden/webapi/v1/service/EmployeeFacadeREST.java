@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  *
  * @author hl
  */
-@Path("v1/employees")
+@Path("employees")
 public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     private EntityManagerFactory emf;
     private Logger logger = Logger.getLogger(EmployeeFacadeREST.class.getName());
