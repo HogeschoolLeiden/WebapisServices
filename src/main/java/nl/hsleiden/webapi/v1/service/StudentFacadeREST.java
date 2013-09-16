@@ -188,19 +188,23 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         //determine which query to create, based on provided parameters
         Query query = null;
         switch (test) {
-            case 1:
-                query = em.createNamedQuery("Students.findAll");
+            
             case 2: 
                 checkLastname(lastname);
                 lastname = formatLastname(lastname);
                 query = em.createNamedQuery("Students.findByLastnameAndEducation").setParameter("lastname", lastname);
                 query.setParameter("education", education);
+                break;
             case 3:
                 query = em.createNamedQuery("Students.findAllForEducation").setParameter("education", education);
+                break;
             case 4: 
                 checkLastname(lastname);
                 lastname = formatLastname(lastname);
                 query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", lastname);
+                break;
+            default:
+                query = em.createNamedQuery("Students.findAll");
         }
  
         //determine is pagination is asked for
