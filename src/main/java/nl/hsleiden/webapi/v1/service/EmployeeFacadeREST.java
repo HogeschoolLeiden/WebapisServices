@@ -32,6 +32,7 @@ import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
 import org.apache.log4j.Logger;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 
 /**
  *
@@ -86,19 +87,47 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         }
     }
     
+
     @GET
     @Produces({"application/json", "application/xml"})
-    public Result findAll(@QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("department") String department) {
-        EntityManager em = getEntityManager();
-        Result result = new Result();
-        Query query = null;
-        
-        if (department != null && department.trim().length() > 0) {
-            query = em.createNamedQuery("Employees.findAllForDepartment()").setParameter("department", department);
-        } else {
-            query = em.createNamedQuery("Employees.findAll()");
+    public Result findByLastname(@Context HttpServletRequest request, @QueryParam("lastname") String lastname, 
+                     @QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("department") String department) throws OAuthSystemException {
+         
+        int test = 0;
+        String lastNameForQuery = null;
+        if (lastname != null && lastname.trim().length() > 0 && department != null && department.trim().length() > 0) {
+            test = 1;
+            lastNameForQuery = formatLastname(lastname);
+        } else if (department != null && department.trim().length() > 0) {
+            test = 2;
+        } else if (lastname != null && lastname.trim().length() > 0) {
+            test = 3;
+            lastNameForQuery = formatLastname(lastname);
         }
         
+        Result result = new Result();
+        EntityManager em = getEntityManager();
+        
+        //determine which query to create, based on provided parameters
+        Query query = null;
+        switch (test) {
+            case 1: 
+                checkLastname(lastname.trim());
+                query = em.createNamedQuery("Employees.findByLastnameAndDepartment").setParameter("lastname", lastNameForQuery);
+                query.setParameter("department", department);
+                break;
+            case 2:
+                query = em.createNamedQuery("Employees.findForDepartment").setParameter("department", department);
+                break;
+            case 3: 
+                checkLastname(lastname.trim());
+                query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", lastNameForQuery);
+                break;
+            default:
+                query = em.createNamedQuery("Employees.findAll");
+        }
+ 
+        //determine is pagination is asked for
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -113,129 +142,62 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
                 logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
                 throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
             }
-            
             Query count = null;
-            if (department != null && department.trim().length() > 0) {
-                logger.debug("******* department: " + department);
-                count = em.createNamedQuery("Employees.getCountAllForDepartment").setParameter("department", department);
-            } else {
-                department = null;
-                count = em.createNamedQuery("Employees.getCountAll");
+
+            switch (test) {
+                case 1:
+                    count = em.createNamedQuery("Employees.getCountForLastnameAndDepartment").setParameter("department", department);
+                    count.setParameter("lastname", lastNameForQuery);
+                    break;
+                case 2:
+                    count = em.createNamedQuery("Employees.getCountForDepartment").setParameter("department", department);
+                    break;
+                case 3:
+                    count = em.createNamedQuery("Employees.getCountForLastname").setParameter("lastname", lastNameForQuery);
+                    break;
+                default:
+                    count = em.createNamedQuery("Employees.getCountAll");
             }
+
             int total = ((Long) count.getSingleResult()).intValue();
-            logger.debug("Totaal: " + total);
             if (total > 0) {
                 result.setTotal(String.valueOf(total));
-                logger.debug("MaxResults: " + total);
                 query.setMaxResults(maxResults);
                 query.setFirstResult(intOffset);
                 int nextOffset = intOffset + maxResults;
                 int previousOffset = intOffset - maxResults;
-                if (nextOffset <= total) {
-                    String next = createpagingLink(null, department, max, String.valueOf(nextOffset));
-                    result.setNext(next);
-                }
-                if (previousOffset > -1) {
-                    String previous = createpagingLink(null, department, max, String.valueOf(previousOffset));
-                    result.setPrevious(previous);
-                }
-            } else {
-                logger.info("No result found error occured ");
-                throw new NotFoundError("No result found");
-            }
-        } else {
-            logger.debug("****geen pagination");
-            query.setFirstResult(0);
-        }
-        
-        List<Employees> names = query.getResultList();
-        if (names.size() > 0) {
-            result.setResults(names);
-            buildLink(names);
-            if (result.getTotal() == null) {
-                result.setTotal(String.valueOf(names.size()));
-            }
-        } 
-        return result;
-    }
-    
-    
-    @GET
-    @Path("{lastname}")
-    @Produces({"application/json", "application/xml"})
-    public Result findByLastname(@PathParam("lastname") String lastname, @QueryParam("department") String department, @QueryParam("max") String max, @QueryParam("offset") String offset) {
-
-        try {
-            Validator.checkLengthLastname(lastname);
-            Validator.validateStringParameter(lastname);
-        } catch (ValidationException ve) {
-            logger.info("A client send a bad request: " + ve.getMessage());
-            throw new BadRequestError(ve.getMessage());
-        }
-        
-        Result result = new Result();
-        EntityManager em = getEntityManager();
-        String name = formatLastname(lastname);
-        Query query = null;
-        if (department != null && department.trim().length() > 0) {
-            query = em.createNamedQuery("Employees.findByLastnameAndDepartment").setParameter("lastname", name);
-            query.setParameter("department", department);
-        } else {
-            query = em.createNamedQuery("Employees.findByLastname").setParameter("lastname", name);
-        }
-        
-        int maxResults = -1;
-        int intOffset = -1;
-        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
-            try {
-                maxResults = Integer.parseInt(max);
-                intOffset = Integer.parseInt(offset);
-            } catch (NumberFormatException n) {
-                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-            }
-
-            if (maxResults < 0 || intOffset < 0) {
-                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-            }
-            Query count = em.createNamedQuery("Employees.getCount").setParameter("lastname", name);
-
-            int total = ((Long) count.getSingleResult()).intValue();
-            logger.debug("Totaal: " + total);
-            if (total > 0) {
-                result.setTotal(String.valueOf(total));
-                logger.debug("MaxResults: " + total);
-                query.setMaxResults(maxResults);
-                query.setFirstResult(intOffset);
-                int nextOffset = intOffset + maxResults;
-                int previousOffset = intOffset - maxResults;
-                if (nextOffset <= total) {
+                if (nextOffset < total) {
                     String next = createpagingLink(lastname, department, max, String.valueOf(nextOffset));
                     result.setNext(next);
                 }
                 if (previousOffset > -1) {
-                    String previous = createpagingLink(lastname, department,  max, String.valueOf(previousOffset));
+                    String previous = createpagingLink(lastname, department, max, String.valueOf(previousOffset));
                     result.setPrevious(previous);
                 }
             } else {
                 logger.info("No result found error occured " + lastname);
-                throw new NotFoundError("No result found " + lastname);
+                throw new NotFoundError("No result found for: " + lastname);
             }
         } else {
             logger.debug("****geen pagination");
             query.setFirstResult(0);
         }
+
         List<Employees> names = query.getResultList();
         if (names.size() > 0) {
             result.setResults(names);
             names = buildLink(names);
+            if (result.getTotal() == null) {
+                result.setTotal(String.valueOf(names.size()));
+            }
         } else {
-            logger.info("No result found for lastname: " + lastname);
-            throw new NotFoundError("No result found " + lastname);
+            logger.info("No result found for lastname: " + lastname + "and/or department " + department);
+            throw new NotFoundError("No result found for lastname: " + lastname + "and/or department: " + department);
         }
         return result;
+
     }
+
 
     @Override
     protected EntityManager getEntityManager() {
@@ -243,6 +205,17 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         return emf.createEntityManager();
     }
 
+    private void checkLastname(String lastname) {
+        try {
+            Validator.checkLengthLastname(lastname);
+            Validator.validateStringParameter(lastname);
+            
+        } catch (ValidationException ve) {
+            logger.info("A client send a bad request: " + ve.getMessage());
+            throw new BadRequestError(ve.getMessage());
+        }
+    }
+    
     /**
      * Formats lastname for a case insensitive search
      *
@@ -287,9 +260,9 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
         UriBuilder ub = uriInfo.getBaseUriBuilder();
         URI userUri = null;
         if (lastname != null && department != null) {
-            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("lastname", lastname).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else if (lastname != null) {
-            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).path("/" + lastname).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
         } else if (department != null) {
             userUri = ub.host(hostname).port(443).path(EmployeeFacadeREST.class).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else {

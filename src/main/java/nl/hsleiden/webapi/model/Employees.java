@@ -23,13 +23,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewmedewerker")
 @XmlRootElement(name="employees")
 @NamedQueries({
-    @NamedQuery(name = "Employees.findAll()", query = "SELECT e FROM Employees e ORDER by e.lastname"),
-    @NamedQuery(name = "Employees.findAllForDepartment()", query = "SELECT e FROM Employees e WHERE e.department = :department ORDER by e.lastname"),
+    @NamedQuery(name = "Employees.findAll", query = "SELECT e FROM Employees e"),
+    @NamedQuery(name = "Employees.findForDepartment", query = "SELECT e FROM Employees e WHERE e.department = :department ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findByLastname", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findByLastnameAndDepartment", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname AND e.department = :department ORDER by e.lastname"),
-    @NamedQuery(name = "Employees.getCount", query = "SELECT COUNT(e) FROM Employees e WHERE lower(e.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Employees.getCountForLastname", query = "SELECT COUNT(e) FROM Employees e WHERE lower(e.lastname) LIKE :lastname"),
     @NamedQuery(name = "Employees.getCountAll", query = "SELECT COUNT(e) FROM Employees e"),
-    @NamedQuery(name = "Employees.getCountAllForDepartment", query = "SELECT COUNT(e) FROM Employees e WHERE e.department = :department")})
+    @NamedQuery(name = "Employees.getCountForDepartment", query = "SELECT COUNT(e) FROM Employees e WHERE e.department = :department"),
+    @NamedQuery(name = "Employees.getCountForLastnameAndDepartment", query = "SELECT COUNT(e) FROM Employees e WHERE e.department = :department AND lower(e.lastname) LIKE :lastname ")})
 public class Employees implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
