@@ -24,10 +24,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="students")
 @NamedQueries({
     @NamedQuery(name = "Students.findAll", query = "SELECT s FROM Students s ORDER by s.lastname"),
-    @NamedQuery(name = "Students.findAllForEducation", query = "SELECT s FROM Students s WHERE s.education = :education ORDER by s.lastname"),
-    @NamedQuery(name = "Students.findByLastname", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname ORDER by s.lastname"),
-    @NamedQuery(name = "Students.findByLastnameAndEducation", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname AND s.education = :education ORDER by s.lastname"),
-    @NamedQuery(name = "Students.getCount", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Students.findAllForEducation", query = "SELECT s FROM Students s WHERE s.education = :education ORDER BY s.lastname"),
+    @NamedQuery(name = "Students.findByLastname", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname ORDER BY s.lastname"),
+    @NamedQuery(name = "Students.findByLastnameAndEducation", query = "SELECT s FROM Students s WHERE lower(s.lastname) LIKE :lastname AND s.education = :education ORDER BY s.lastname"),
+    @NamedQuery(name = "Students.getCountForLastname", query = "SELECT COUNT(s) FROM Students s WHERE lower(s.lastname) LIKE :lastname"),
     @NamedQuery(name = "Students.getCountAll", query = "SELECT COUNT(s) FROM Students s"),
     @NamedQuery(name = "Students.getCountForNameAndEducation", query = "SELECT COUNT(s) FROM Students s WHERE s.education LIKE :education AND lower(s.lastname) LIKE :lastname"),
     @NamedQuery(name = "Students.getCountAllForEducation", query = "SELECT COUNT(s) FROM Students s WHERE s.education LIKE :education")})

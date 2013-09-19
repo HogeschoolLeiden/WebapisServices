@@ -91,95 +91,21 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         }
     }
 
-//    @GET
-//    @Produces({"application/json", "application/xml"})
-//    public Result findAll(@QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("education") String education) {
-//        EntityManager em = getEntityManager();
-//        Result result = new Result();
-//        Query query = null;
-//        
-//        if (education != null && education.trim().length() > 0) {
-//            query = em.createNamedQuery("Students.findAllForEducation()").setParameter("education", education);
-//        } else {
-//            query = em.createNamedQuery("Students.findAll()");
-//        }
-//        
-//        int maxResults;
-//        int intOffset;
-//        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
-//            try {
-//                maxResults = Integer.parseInt(max);
-//                intOffset = Integer.parseInt(offset);
-//            } catch (NumberFormatException n) {
-//                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-//                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-//            }
-//            if (maxResults < 0 || intOffset < 0) {
-//                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-//                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-//            }
-//            
-//            Query count = null;
-//            if (education != null && education.trim().length() > 0) {
-//                logger.debug("******* education: " + education);
-//                count = em.createNamedQuery("Students.getCountAllForEducation").setParameter("education", education);
-//            } else {
-//                education = null;
-//                count = em.createNamedQuery("Students.getCountAll");
-//            }
-//            int total = ((Long) count.getSingleResult()).intValue();
-//            logger.debug("Totaal: " + total);
-//            if (total > 0) {
-//                result.setTotal(String.valueOf(total));
-//                logger.debug("MaxResults: " + total);
-//                query.setMaxResults(maxResults);
-//                query.setFirstResult(intOffset);
-//                int nextOffset = intOffset + maxResults;
-//                int previousOffset = intOffset - maxResults;
-//                if (nextOffset <= total) {
-//                    String next = createpagingLink(null, education, max, String.valueOf(nextOffset));
-//                    result.setNext(next);
-//                }
-//                if (previousOffset > -1) {
-//                    String previous = createpagingLink(null, education, max, String.valueOf(previousOffset));
-//                    result.setPrevious(previous);
-//                }
-//            } else {
-//                logger.info("No result found error occured ");
-//                throw new NotFoundError("No result found");
-//            }
-//        } else {
-//            logger.debug("****geen pagination");
-//            query.setFirstResult(0);
-//        }
-//        
-//        List<Students> names = query.getResultList();
-//        if (names.size() > 0) {
-//            result.setResults(names);
-//            buildLink(names);
-//            if (result.getTotal() == null) {
-//                result.setTotal(String.valueOf(names.size()));
-//            }
-//        } 
-//        return result;
-//    }
-    
     @GET
-    //@Path("{lastname}")
     @Produces({"application/json", "application/xml"})
     public Result findByLastname(@Context HttpServletRequest request, @QueryParam("lastname") String lastname, 
                      @QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("education") String education) throws OAuthSystemException {
-        logger.debug("In methode");
-        //String name = null;
-        
-        int test = 1;
-        
+         
+        int test = 0;
+        String lastNameForQuery = null;
         if (lastname != null && lastname.trim().length() > 0 && education != null && education.trim().length() > 0) {
-            test = 2;
+            test = 1;
+            lastNameForQuery = formatLastname(lastname);
         } else if (education != null && education.trim().length() > 0) {
-            test = 3;
+            test = 2;
         } else if (lastname != null && lastname.trim().length() > 0) {
-            test = 4;
+            test = 3;
+            lastNameForQuery = formatLastname(lastname);
         }
         
         Result result = new Result();
@@ -188,20 +114,17 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         //determine which query to create, based on provided parameters
         Query query = null;
         switch (test) {
-            
-            case 2: 
-                checkLastname(lastname);
-                lastname = formatLastname(lastname);
-                query = em.createNamedQuery("Students.findByLastnameAndEducation").setParameter("lastname", lastname);
+            case 1: 
+                checkLastname(lastname.trim());
+                query = em.createNamedQuery("Students.findByLastnameAndEducation").setParameter("lastname", lastNameForQuery);
                 query.setParameter("education", education);
                 break;
-            case 3:
+            case 2:
                 query = em.createNamedQuery("Students.findAllForEducation").setParameter("education", education);
                 break;
-            case 4: 
-                checkLastname(lastname);
-                lastname = formatLastname(lastname);
-                query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", lastname);
+            case 3: 
+                checkLastname(lastname.trim());
+                query = em.createNamedQuery("Students.findByLastname").setParameter("lastname", lastNameForQuery);
                 break;
             default:
                 query = em.createNamedQuery("Students.findAll");
@@ -226,21 +149,22 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
 
             switch (test) {
                 case 1:
-                    count = em.createNamedQuery("Students.countAll");
-                case 2:
                     count = em.createNamedQuery("Students.getCountForNameAndEducation").setParameter("education", education);
-                    count.setParameter("lastname", lastname);
-                case 3:
+                    count.setParameter("lastname", lastNameForQuery);
+                    break;
+                case 2:
                     count = em.createNamedQuery("Students.getCountAllForEducation").setParameter("education", education);
-                case 4:
-                    em.createNamedQuery("Students.getCount").setParameter("lastname", lastname);
+                    break;
+                case 3:
+                    count = em.createNamedQuery("Students.getCountForLastname").setParameter("lastname", lastNameForQuery);
+                    break;
+                default:
+                    count = em.createNamedQuery("Students.getCountAll");
             }
 
             int total = ((Long) count.getSingleResult()).intValue();
-            logger.debug("Totaal: " + total);
             if (total > 0) {
                 result.setTotal(String.valueOf(total));
-                logger.debug("MaxResults: " + total);
                 query.setMaxResults(maxResults);
                 query.setFirstResult(intOffset);
                 int nextOffset = intOffset + maxResults;
@@ -281,7 +205,6 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
     @Path("/grades/{date}")
     @Produces({"application/json"})
     public Result findByLastUpdate(@PathParam("date") String date) {
-        logger.debug("In method findbylastupdate: " + date);
         Result result = new Result();
         Timestamp ts = Timestamp.valueOf(date);
         
@@ -347,9 +270,9 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         UriBuilder ub = uriInfo.getBaseUriBuilder();
         URI userUri = null;
         if (lastname != null && education != null) {
-            userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).path("/" + lastname).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).queryParam("lastname", lastname).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
         } else if (lastname != null) {
-            userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).path("/" + lastname).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
         } else if (education != null) {
             userUri = ub.host(hostname).port(443).path(StudentFacadeREST.class).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
         } else {
