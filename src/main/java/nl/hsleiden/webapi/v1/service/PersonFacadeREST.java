@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
  *
  * @author hl
  */
-@Path("person")
+@Path("persons")
 public class PersonFacadeREST {
 
     private EntityManagerFactory emf;
@@ -53,12 +53,37 @@ public class PersonFacadeREST {
     public PersonFacadeREST() {
     }
 
+
+    
+    /**
+     * Retrieves representation of an instance of nl.hsleiden.webapi.v1.service.PersonFacadeREST
+     * @return an instance of java.lang.String
+     */
     @GET
-    @Produces({"application/json", "application/xml"})   
-    public Result findAll(@QueryParam("max") String max, @QueryParam("offset") String offset) {
-        EntityManager em = getEntityManager();
+    @Produces({"application/json", "application/xml"})
+    public Result findPersonsByLastName(@QueryParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
+    
         Result result = new Result();
-        Query query = em.createNamedQuery("Persons.findAll");
+        EntityManager em = getEntityManager();
+        Query query = null;
+                
+        String nameForQuery = null;
+        int test = 0;
+        if (lastname != null && lastname.trim().length() > 0) {
+            test = 1;
+            nameForQuery = formatLastname(lastname);
+        }
+        
+        switch (test){
+            case 1:
+                checkLastname(lastname);
+                query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", nameForQuery);
+                break;
+            default:
+               query = em.createNamedQuery("Persons.findAll"); 
+        }
+
+        
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -74,106 +99,31 @@ public class PersonFacadeREST {
                 throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
             }
             
-            Query count = null;
-            String education = null;
-//            if (education != null && education.trim().length() > 0) {
-//                logger.debug("******* education: " + education);
-//                count = em.createNamedQuery("Students.getCountAllForEducation").setParameter("education", education);
-//            } else {
-//                education = null;
-//                count = em.createNamedQuery("Students.getCountAll");
-//            }
-            count = em.createNamedQuery("Persons.getCountAll");
+            
+            Query count = em.createNamedQuery("Persons.getCount").setParameter("lastname", nameForQuery);
+
+            switch (test){
+            case 1:
+                count = em.createNamedQuery("Persons.getCount").setParameter("lastname", nameForQuery);
+                break;
+            default:
+                count = em.createNamedQuery("Persons.getCountAll"); 
+            }
+            
             int total = ((Long) count.getSingleResult()).intValue();
             logger.debug("Totaal: " + total);
             if (total > 0) {
                 result.setTotal(String.valueOf(total));
-                logger.debug("MaxResults: " + total);
                 query.setMaxResults(maxResults);
                 query.setFirstResult(intOffset);
                 int nextOffset = intOffset + maxResults;
                 int previousOffset = intOffset - maxResults;
                 if (nextOffset <= total) {
-                    String next = createpagingLink(null, education, max, String.valueOf(nextOffset));
+                    String next = createpagingLink(lastname, null, max, String.valueOf(nextOffset));
                     result.setNext(next);
                 }
                 if (previousOffset > -1) {
-                    String previous = createpagingLink(null, education, max, String.valueOf(previousOffset));
-                    result.setPrevious(previous);
-                }
-            } else {
-                logger.info("No result found error occured ");
-                throw new NotFoundError("No result found");
-            }
-        } else {
-            logger.debug("****geen pagination");
-            query.setFirstResult(0);
-        }
-        
-        List<Persons> names = query.getResultList();
-        if (names.size() > 0) {
-            result.setResults(names);
-            buildLink(names);
-            if (result.getTotal() == null) {
-                result.setTotal(String.valueOf(names.size()));
-            }
-        } 
-        return result;    
-    }
-    
-    /**
-     * Retrieves representation of an instance of nl.hsleiden.webapi.v1.service.PersonFacadeREST
-     * @return an instance of java.lang.String
-     */
-    @GET
-    @Path("{lastname}")
-    @Produces({"application/json", "application/xml"})
-    public Result findPersonsByLastName(@PathParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
-    
-        try {
-            Validator.checkLengthLastname(lastname);
-            Validator.validateStringParameter(lastname);
-        } catch (ValidationException ve) {
-            logger.info("A client send a bad request: " + ve.getMessage());
-            throw new BadRequestError(ve.getMessage());
-        }
-
-        Result result = new Result();
-
-        EntityManager em = getEntityManager();
-        String name = formatLastname(lastname);
-        Query query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", name);
-        int maxResults;
-        int intOffset;
-        if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
-            try {
-                maxResults = Integer.parseInt(max);
-                intOffset = Integer.parseInt(offset);
-            } catch (NumberFormatException n) {
-                logger.info("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-                throw new BadRequestError("Parameters max and/or offset are not a number. Max =  " + max + ", offset = " + offset);
-            }
-            if (maxResults < 0 || intOffset < 0) {
-                logger.info("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-                throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
-            }
-            Query count = em.createNamedQuery("Persons.getCount").setParameter("lastname", name);
-
-            int total = ((Long) count.getSingleResult()).intValue();
-            logger.debug("Totaal: " + total);
-            if (total > 0) {
-                result.setTotal(String.valueOf(total));
-                logger.debug("MaxResults: " + total);
-                query.setMaxResults(maxResults);
-                query.setFirstResult(intOffset);
-                int nextOffset = intOffset + maxResults;
-                int previousOffset = intOffset - maxResults;
-                if (nextOffset <= total) {
-                    String next = createpagingLink(lastname, max, String.valueOf(nextOffset));
-                    result.setNext(next);
-                }
-                if (previousOffset > -1) {
-                    String previous = createpagingLink(lastname, max, String.valueOf(previousOffset));
+                    String previous = createpagingLink(lastname, null, max, String.valueOf(previousOffset));
                     result.setPrevious(previous);
                 }
             } else {
@@ -188,12 +138,14 @@ public class PersonFacadeREST {
         if (names.size() > 0) {
             result.setResults(names);
             names = buildLink(names);
+            if (result.getTotal() == null) {
+                result.setTotal(String.valueOf(names.size()));
+            }
         } else {
             logger.info("No result found for lastname: " + lastname);
             throw new NotFoundError("No result found " + lastname);
         }
         return result;
-
     }
 
     protected EntityManager getEntityManager() {
@@ -214,6 +166,17 @@ public class PersonFacadeREST {
         return sb.toString();
     }
 
+    private void checkLastname(String lastname) {
+        try {
+            Validator.checkLengthLastname(lastname);
+            Validator.validateStringParameter(lastname);
+            
+        } catch (ValidationException ve) {
+            logger.info("A client send a bad request: " + ve.getMessage());
+            throw new BadRequestError(ve.getMessage());
+        }
+    }
+    
     /**
      * Creates an uri for linking to more information. Persons.id is used.
      *
@@ -241,9 +204,9 @@ public class PersonFacadeREST {
         UriBuilder ub = uriInfo.getBaseUriBuilder();
         URI userUri = null;
         if (lastname != null && education != null) {
-            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).path("/" + lastname).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
         } else if (lastname != null) {
-            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).path("/" + lastname).queryParam("max", max).queryParam("offset", offset).build();
+            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
         } else if (education != null) {
             userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
         } else {
@@ -252,13 +215,14 @@ public class PersonFacadeREST {
         }
         return userUri.toString();
     }
-    private String createpagingLink(String param, String max, String offset) {
-        String hostname = request.getServerName();
-        UriBuilder ub = uriInfo.getBaseUriBuilder(); 
-        URI userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).path("/" + param).queryParam("max", max).queryParam("offset", offset).build();
-        
-        return userUri.toString();
-    }
+    
+//    private String createpagingLink(String lastname, String max, String offset) {
+//        String hostname = request.getServerName();
+//        UriBuilder ub = uriInfo.getBaseUriBuilder(); 
+//        URI userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
+//        
+//        return userUri.toString();
+//    }
 
     
 }
