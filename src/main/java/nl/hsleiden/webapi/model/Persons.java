@@ -27,7 +27,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Persons.findAll", query = "SELECT p FROM Persons p ORDER by p.lastname"),
     @NamedQuery(name = "Persons.findByLastname", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname ORDER by p.lastname"), 
-    @NamedQuery(name = "Persons.getCount", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Persons.findByLastnameAndEducation", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.education = :education ORDER by p.lastname"), 
+    @NamedQuery(name = "Persons.findByEducation", query = "SELECT p FROM Persons p WHERE p.education = :education"), 
+
+    @NamedQuery(name = "Persons.getCountForLastname", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname"),
+    @NamedQuery(name = "Persons.getCountForLastnameAndEducation", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.education = :education"),
+    @NamedQuery(name = "Persons.getCountForEducation", query = "SELECT COUNT(p) FROM Persons p WHERE p.education = :education"),
     @NamedQuery(name = "Persons.getCountAll", query = "SELECT COUNT(p) FROM Persons p")})
 public class Persons implements Serializable {
     private static final long serialVersionUID = 1L;
