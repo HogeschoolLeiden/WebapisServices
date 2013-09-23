@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
@@ -61,7 +60,7 @@ public class PersonFacadeREST {
      */
     @GET
     @Produces({"application/json", "application/xml"})
-    public Result findPersonsByLastName(@QueryParam("lastname") String lastname, @QueryParam("max") String max, @QueryParam("offset") String offset) {
+    public Result findPersonsByLastName(@QueryParam("lastname") String lastname, @QueryParam("education") String education, @QueryParam("department") String department, @QueryParam("max") String max, @QueryParam("offset") String offset) {
     
         Result result = new Result();
         EntityManager em = getEntityManager();
@@ -69,21 +68,42 @@ public class PersonFacadeREST {
                 
         String nameForQuery = null;
         int test = 0;
-        if (lastname != null && lastname.trim().length() > 0) {
+        if (lastname != null && lastname.trim().length() > 0 && education != null && education.trim().length() > 0) {
+            test = 2;
+            nameForQuery = formatLastname(lastname);
+        } else if (lastname != null && lastname.trim().length() > 0 && department != null && department.trim().length() > 0) { 
+            test = 4;
+            nameForQuery = formatLastname(lastname);
+        } else if (lastname != null && lastname.trim().length() > 0 ) {
             test = 1;
             nameForQuery = formatLastname(lastname);
+        } else if (education != null && education.trim().length() > 0) {
+            test = 3;
+        } else if (department != null && department.trim().length() > 0) {
+            test = 5;
         }
         
         switch (test){
             case 1:
                 checkLastname(lastname);
                 query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", nameForQuery);
+                education = null; //for building correct paging links this must be null
+                break;
+            case 2:
+                checkLastname(lastname);
+                query = em.createNamedQuery("Persons.findByLastnameAndEducation").setParameter("lastname", nameForQuery);
+                query.setParameter("education", education);
+                break;
+            case 3:
+                query = em.createNamedQuery("Persons.findByEducation").setParameter("education", education);
+                lastname = null; //for building correct paging links this must be null
                 break;
             default:
-               query = em.createNamedQuery("Persons.findAll"); 
+                lastname = null; //for building correct paging links this must be null
+                education = null;
+                query = em.createNamedQuery("Persons.findAll"); 
         }
 
-        
         int maxResults;
         int intOffset;
         if (max != null && max.trim().length() > 0 && offset != null && offset.trim().length() > 0) {
@@ -99,12 +119,17 @@ public class PersonFacadeREST {
                 throw new BadRequestError("A negative number is provided for offset or max: " + "max = " + max + ", offset = " + offset);
             }
             
-            
-            Query count = em.createNamedQuery("Persons.getCount").setParameter("lastname", nameForQuery);
-
+            Query count = null;
             switch (test){
             case 1:
-                count = em.createNamedQuery("Persons.getCount").setParameter("lastname", nameForQuery);
+                count = em.createNamedQuery("Persons.getCountForLastname").setParameter("lastname", nameForQuery);
+                break;
+            case 2:
+                count = em.createNamedQuery("Persons.getCountForLastnameAndEducation").setParameter("lastname", nameForQuery);
+                count.setParameter("education", education);
+                break;
+            case 3:
+                count = em.createNamedQuery("Persons.getCountForEducation").setParameter("education", education);
                 break;
             default:
                 count = em.createNamedQuery("Persons.getCountAll"); 
@@ -118,12 +143,12 @@ public class PersonFacadeREST {
                 query.setFirstResult(intOffset);
                 int nextOffset = intOffset + maxResults;
                 int previousOffset = intOffset - maxResults;
-                if (nextOffset <= total) {
-                    String next = createpagingLink(lastname, null, max, String.valueOf(nextOffset));
+                if (nextOffset < total) {
+                    String next = createpagingLink(lastname, education, max, String.valueOf(nextOffset));
                     result.setNext(next);
                 }
                 if (previousOffset > -1) {
-                    String previous = createpagingLink(lastname, null, max, String.valueOf(previousOffset));
+                    String previous = createpagingLink(lastname, education, max, String.valueOf(previousOffset));
                     result.setPrevious(previous);
                 }
             } else {
@@ -215,14 +240,4 @@ public class PersonFacadeREST {
         }
         return userUri.toString();
     }
-    
-//    private String createpagingLink(String lastname, String max, String offset) {
-//        String hostname = request.getServerName();
-//        UriBuilder ub = uriInfo.getBaseUriBuilder(); 
-//        URI userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
-//        
-//        return userUri.toString();
-//    }
-
-    
 }
