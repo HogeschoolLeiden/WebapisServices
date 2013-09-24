@@ -25,14 +25,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewpersoon")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Persons.findAll", query = "SELECT p FROM Persons p ORDER by p.lastname"),
+    @NamedQuery(name = "Persons.findAll", query = "SELECT p FROM Persons p ORDER by p.lastname "),
     @NamedQuery(name = "Persons.findByLastname", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname ORDER by p.lastname"), 
     @NamedQuery(name = "Persons.findByLastnameAndEducation", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.education = :education ORDER by p.lastname"), 
-    @NamedQuery(name = "Persons.findByEducation", query = "SELECT p FROM Persons p WHERE p.education = :education"), 
-
+    @NamedQuery(name = "Persons.findByLastnameAndDepartment", query = "SELECT p FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.department = :department ORDER by p.lastname"), 
+    @NamedQuery(name = "Persons.findByEducation", query = "SELECT p FROM Persons p WHERE p.education = :education ORDER by p.lastname"), 
+    @NamedQuery(name = "Persons.findByDepartment", query = "SELECT p FROM Persons p WHERE p.department = :department ORDER by p.lastname"),
     @NamedQuery(name = "Persons.getCountForLastname", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname"),
     @NamedQuery(name = "Persons.getCountForLastnameAndEducation", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.education = :education"),
+    @NamedQuery(name = "Persons.getCountForLastnameAndDepartment", query = "SELECT COUNT(p) FROM Persons p WHERE lower(p.lastname) LIKE :lastname AND p.department = :department"),
     @NamedQuery(name = "Persons.getCountForEducation", query = "SELECT COUNT(p) FROM Persons p WHERE p.education = :education"),
+    @NamedQuery(name = "Persons.getCountForDepartment", query = "SELECT COUNT(p) FROM Persons p WHERE p.department = :department"),
     @NamedQuery(name = "Persons.getCountAll", query = "SELECT COUNT(p) FROM Persons p")})
 public class Persons implements Serializable {
     private static final long serialVersionUID = 1L;

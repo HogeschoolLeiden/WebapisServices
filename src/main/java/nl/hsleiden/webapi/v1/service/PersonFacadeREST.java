@@ -69,38 +69,48 @@ public class PersonFacadeREST {
         String nameForQuery = null;
         int test = 0;
         if (lastname != null && lastname.trim().length() > 0 && education != null && education.trim().length() > 0) {
-            test = 2;
-            nameForQuery = formatLastname(lastname);
-        } else if (lastname != null && lastname.trim().length() > 0 && department != null && department.trim().length() > 0) { 
-            test = 4;
-            nameForQuery = formatLastname(lastname);
-        } else if (lastname != null && lastname.trim().length() > 0 ) {
             test = 1;
             nameForQuery = formatLastname(lastname);
-        } else if (education != null && education.trim().length() > 0) {
+        } else if (lastname != null && lastname.trim().length() > 0 && department != null && department.trim().length() > 0) { 
+            test = 2;
+            nameForQuery = formatLastname(lastname);
+        } else if (lastname != null && lastname.trim().length() > 0 ) {
             test = 3;
+            nameForQuery = formatLastname(lastname);
+        } else if (education != null && education.trim().length() > 0) {
+            test = 4;
         } else if (department != null && department.trim().length() > 0) {
             test = 5;
         }
         
-        switch (test){
+        switch (test) {
             case 1:
-                checkLastname(lastname);
-                query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", nameForQuery);
-                education = null; //for building correct paging links this must be null
-                break;
-            case 2:
                 checkLastname(lastname);
                 query = em.createNamedQuery("Persons.findByLastnameAndEducation").setParameter("lastname", nameForQuery);
                 query.setParameter("education", education);
                 break;
+            case 2:
+                checkLastname(lastname);
+                query = em.createNamedQuery("Persons.findByLastnameAndDepartment").setParameter("lastname", nameForQuery);
+                query.setParameter("department", department);
+                break;
             case 3:
+                checkLastname(lastname);
+                query = em.createNamedQuery("Persons.findByLastname").setParameter("lastname", nameForQuery);
+                education = null; //for building correct paging links this must be null
+                break;
+            case 4:
                 query = em.createNamedQuery("Persons.findByEducation").setParameter("education", education);
+                lastname = null; //for building correct paging links this must be null
+                break;
+            case 5:
+                query = em.createNamedQuery("Persons.findByDepartment").setParameter("department", department);
                 lastname = null; //for building correct paging links this must be null
                 break;
             default:
                 lastname = null; //for building correct paging links this must be null
                 education = null;
+                department = null;
                 query = em.createNamedQuery("Persons.findAll"); 
         }
 
@@ -122,14 +132,21 @@ public class PersonFacadeREST {
             Query count = null;
             switch (test){
             case 1:
-                count = em.createNamedQuery("Persons.getCountForLastname").setParameter("lastname", nameForQuery);
-                break;
-            case 2:
                 count = em.createNamedQuery("Persons.getCountForLastnameAndEducation").setParameter("lastname", nameForQuery);
                 count.setParameter("education", education);
                 break;
+            case 2:
+                count = em.createNamedQuery("Persons.getCountForLastnameAndDepartment").setParameter("lastname", nameForQuery);
+                count.setParameter("department", department);
+                break;
             case 3:
+                count = em.createNamedQuery("Persons.getCountForLastname").setParameter("lastname", nameForQuery);
+                break;
+            case 4:
                 count = em.createNamedQuery("Persons.getCountForEducation").setParameter("education", education);
+                break;
+            case 5:
+                count = em.createNamedQuery("Persons.getCountForDepartment").setParameter("department", department);
                 break;
             default:
                 count = em.createNamedQuery("Persons.getCountAll"); 
@@ -144,11 +161,11 @@ public class PersonFacadeREST {
                 int nextOffset = intOffset + maxResults;
                 int previousOffset = intOffset - maxResults;
                 if (nextOffset < total) {
-                    String next = createpagingLink(lastname, education, max, String.valueOf(nextOffset));
+                    String next = createpagingLink(lastname, education, department, max, String.valueOf(nextOffset));
                     result.setNext(next);
                 }
                 if (previousOffset > -1) {
-                    String previous = createpagingLink(lastname, education, max, String.valueOf(previousOffset));
+                    String previous = createpagingLink(lastname, education, department, max, String.valueOf(previousOffset));
                     result.setPrevious(previous);
                 }
             } else {
@@ -224,16 +241,20 @@ public class PersonFacadeREST {
         return persons;
     }
 
-    private String createpagingLink(String lastname, String education, String max, String offset) {
+    private String createpagingLink(String lastname, String education, String department, String max, String offset) {
         String hostname = request.getServerName();
         UriBuilder ub = uriInfo.getBaseUriBuilder();
         URI userUri = null;
         if (lastname != null && education != null) {
             userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
+        } else if (lastname != null && department != null) { 
+            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else if (lastname != null) {
             userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("lastname", lastname).queryParam("max", max).queryParam("offset", offset).build();
         } else if (education != null) {
             userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("education", education).queryParam("max", max).queryParam("offset", offset).build();
+        } else if (department != null) {
+            userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("department", department).queryParam("max", max).queryParam("offset", offset).build();
         } else {
             userUri = ub.host(hostname).port(443).path(PersonFacadeREST.class).queryParam("max", max).queryParam("offset", offset).build();
 

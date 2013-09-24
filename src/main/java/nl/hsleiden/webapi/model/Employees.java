@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "viewmedewerker")
 @XmlRootElement(name="employees")
 @NamedQueries({
-    @NamedQuery(name = "Employees.findAll", query = "SELECT e FROM Employees e"),
+    @NamedQuery(name = "Employees.findAll", query = "SELECT e FROM Employees e ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findForDepartment", query = "SELECT e FROM Employees e WHERE e.department = :department ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findByLastname", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname ORDER by e.lastname"),
     @NamedQuery(name = "Employees.findByLastnameAndDepartment", query = "SELECT e FROM Employees e WHERE lower(e.lastname) LIKE :lastname AND e.department = :department ORDER by e.lastname"),
