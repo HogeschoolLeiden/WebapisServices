@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context antiJARLocking="true" path="/WebapisServices">
-    <ResourceLink global='jdbc/apis' name='jdbc/apis' type="javax.sql.Datasource"/>    
+  <ResourceLink global="jdbc/apis" name="jdbc/apis" type="javax.sql.Datasource"/>
 </Context>

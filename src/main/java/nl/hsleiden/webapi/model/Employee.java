@@ -52,9 +52,9 @@ public class Employee implements Serializable {
     @Size(max = 15)
     @Column(name = "telefoonvast")
     private String phonenumberHl;
-    @Size(max = 15)
-    @Column(name = "mobielhogeschool")
-    private String mobileHl;
+//    @Size(max = 15)
+//    @Column(name = "mobielhogeschool")
+//    private String mobileHl;
     @Size(max = 15)
     @Column(name = "locatie")
     private String location;
@@ -173,13 +173,13 @@ public class Employee implements Serializable {
         this.phonenumberHl = phonenumberhl;
     }
 
-    public String getMobileHl() {
-        return mobileHl;
-    }
-
-    public void setMobileHl(String mobilehl) {
-        this.mobileHl = mobilehl;
-    }
+//    public String getMobileHl() {
+//        return mobileHl;
+//    }
+//
+//    public void setMobileHl(String mobilehl) {
+//        this.mobileHl = mobilehl;
+//    }
 
     public String getLocation() {
         return location;
