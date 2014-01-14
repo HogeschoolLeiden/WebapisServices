@@ -63,7 +63,7 @@ public class StudentFacadeREST extends AbstractFacade<Student> {
         
         if (id.equals("@me")) {
             String uid = (String) request.getAttribute("uid");
-            String organisation = (String) request.getAttribute(uid);
+            String organisation = (String) request.getAttribute("homeOrganisation");
             
             if (uid != null && uid.length() > 0 && organisation != null && organisation.length() > 0) {
 
