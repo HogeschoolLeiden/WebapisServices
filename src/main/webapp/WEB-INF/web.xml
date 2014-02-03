@@ -20,7 +20,7 @@
             <url-pattern>/v1/*</url-pattern>
      </servlet-mapping>
     <error-page>
-        <error-code>*</error-code>
+        <error-code>404</error-code>
         <location>/Error.jsp</location>
     </error-page>
 </web-app>
