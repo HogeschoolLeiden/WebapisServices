@@ -1,6 +1,17 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2014 Hogeschool Leiden.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package nl.hsleiden.webapi.v1.service;
 
@@ -32,7 +43,7 @@ import nl.hsleiden.webapi.util.Result;
 import nl.hsleiden.webapi.util.ValidationException;
 import nl.hsleiden.webapi.util.Validator;
 import org.apache.log4j.Logger;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+
 
 /**
  *
@@ -91,7 +102,7 @@ public class EmployeeFacadeREST extends AbstractFacade<Employee> {
     @GET
     @Produces({"application/json", "application/xml"})
     public Result findByLastname(@Context HttpServletRequest request, @QueryParam("lastname") String lastname, 
-                     @QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("department") String department) throws OAuthSystemException {
+                     @QueryParam("max") String max, @QueryParam("offset") String offset, @QueryParam ("department") String department) {
          
         int test = 0;
         String lastNameForQuery = null;
